@@ -7,6 +7,8 @@ import java.util.*;
 
 import javax.swing.*;
 
+import DataManage.Plink;
+
 public class GUIMDR
 {
 	public static boolean standard=false;
@@ -15,7 +17,7 @@ public class GUIMDR
 	public static File name_bed=new File("");
 	public static File name_bim=new File("");	
 	public static File name_fam=new File("");
-	
+	public static Plink dataset=null;
 	public static File name_ped=new File("");
 	public static File name_map=new File("");
 	public static File name_phe=new File("");

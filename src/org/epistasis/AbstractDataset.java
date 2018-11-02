@@ -306,12 +306,66 @@ public abstract class AbstractDataset extends AbstractList implements Cloneable 
 		}
 		// cgb end
 	}
-
-	public void read(String[] filename)
+	public void read(String[]  filename)
 	{
 		ArrayList<ArrayList> missingGenotypeInformation = new ArrayList();
 		clear();
 		Plink plinkread=new Plink(filename);
+		String line=plinkread.getSNPnameasString();
+		line+="\tclass";
+		String selectedMarkers = setSelectedMarkerIndex(line);
+		labels = new AttributeLabels(selectedMarkers.split(delim),true);
+		try {
+			imp = new Imputation();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		imp.initial(labels.size() + 1);
+		int len=plinkread.getSNPnum();
+		try {
+			for(int i=0;i<plinkread.getIndividualnum();i++)
+			{
+				String line_markers_phe=plinkread.getMarkersStatusasString(i);
+				String[] fields = line_markers_phe.split(delim);
+				String[] subFields = getSubStringArray(fields, len);
+				ArrayList m = imp.MarkerCensus(subFields);
+				if (m != null) {
+					missingGenotypeInformation.add(m);
+				}
+				add(createInstance(subFields));
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		imp.CalculateGenotypeFrequency();
+		for (Iterator e = missingGenotypeInformation.iterator(); e.hasNext();) 
+		{
+			ArrayList g = (ArrayList) e.next();
+			int id = ((Integer) g.get(0)).intValue();
+			Instance inst = (Instance) get(id);
+			for (int j = 1; j < g.size(); j++) {
+				int idx = ((Integer) g.get(j)).intValue();
+				String imputed_code = imp.generateGenotype(((Integer) g.get(j)).intValue());
+				inst.impute(((Integer) g.get(j)).intValue(), imputed_code);
+			}
+		}
+		// cgb begin
+		double ratio = getRatio();
+		double mu = ratio / (1 + ratio);
+		for (int i = 0; i < instances.size(); i++) {
+			((Instance) instances.get(i)).iniMU(mu);
+		}
+		// cgb end
+		
+	}
+
+	public void read(Plink plinkread)
+	{
+		ArrayList<ArrayList> missingGenotypeInformation = new ArrayList();
+		clear();
+//		Plink plinkread=new Plink(filename);
 		String line=plinkread.getSNPnameasString();
 		line+="\tclass";
 		String selectedMarkers = setSelectedMarkerIndex(line);

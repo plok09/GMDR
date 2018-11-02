@@ -60,9 +60,10 @@ import org.epistasis.gui.TextComponentUpdaterThread;
 import org.molgenis.genotype.annotation.CaseControlAnnotation;
 
 import DataManage.Dataset;
+import DataManage.Plink;
 import gmdr.AnalysisThread;
 import gmdr.Main;
-
+import GUI.ColumnSelectableJTable;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.BevelBorder;
@@ -167,7 +168,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	public static JTextArea txtphenopath=new JTextArea(1,50);
 	private JButton loadphenotype=new JButton("Load Phenotype");
 	private static JPanel pnlpheofile=new JPanel();
-	private static JTable table221;
+	private static ColumnSelectableJTable table221;
 	private static JScrollPane scrollpane_table221;
 	private static Object name221[];
 	private static Object data221[][];
@@ -180,13 +181,13 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	private static JButton addpredictor=new JButton("\u25BC");
 	private JPanel pnlselectedvar=new JPanel();
 	private JPanel pnlresponse=new JPanel();
-	private JTable table241;
+	private ColumnSelectableJTable table241;
 	private JScrollPane scrollpane_table241;
 	private Object name241[];
 	private Vector index_table241=new Vector(10,5);
 	private Object data241[][];
 	private JPanel pnlpredictor=new JPanel();
-	private JTable table242;
+	private ColumnSelectableJTable table242;
 	private JScrollPane scrollpane_table242;
 	private Object name242[];
 	private Vector index_table242=new Vector(10,5);
@@ -410,7 +411,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		jpanalysis.add(prgProgress);
 		jtsummary.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtsummary.setModel(dtmSummaryTable);
-		//	jtsummary=new JTable(data_table151,jtsummaryname);
+		//	jtsummary=new ColumnSelectableJTable(data_table151,jtsummaryname);
 		jtsummary.setPreferredScrollableViewportSize(new Dimension(750,60));
 		scrollpane_table151=new JScrollPane(jtsummary);
 		/////////////////////////
@@ -598,7 +599,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		
 		initData221();
 		
-		table221=new JTable(data221,name221); 
+		table221=new ColumnSelectableJTable(data221,name221); 
+		table221.setEnabled(false);
 		scrollpane_table221=new JScrollPane(table221);
 		table221.setPreferredScrollableViewportSize(new Dimension(720,100));
 	    table221.setColumnSelectionAllowed(true);
@@ -665,24 +667,30 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				}
 				return;
 		} 
-		String[] genofiles;
-		if(GUIMDR.name_bed.getName()=="")
-		{
-			genofiles=new String[2];
-			genofiles[0]=new String(GUIMDR.name_ped.getAbsolutePath());
-			genofiles[1]=new String(GUIMDR.name_map.getAbsolutePath());
-		}
-		else
-		{
-			genofiles=new String[3];
-			genofiles[0]=new String(GUIMDR.name_bed.getAbsolutePath());
-			genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
-			genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
-		}
+/*		
+		*/
 		Dataset dataset=new Dataset();
 		dataset.IsloadScore(false);
 		dataset.setPaired(ispaired.isSelected());
-		dataset.read(genofiles);
+		if (GUIMDR.dataset==null)
+		{
+			String[] genofiles;
+			if(GUIMDR.name_bed.getName()=="")
+			{
+				genofiles=new String[2];
+				genofiles[0]=new String(GUIMDR.name_ped.getAbsolutePath());
+				genofiles[1]=new String(GUIMDR.name_map.getAbsolutePath());
+			}
+			else
+			{
+				genofiles=new String[3];
+				genofiles[0]=new String(GUIMDR.name_bed.getAbsolutePath());
+				genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
+				genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
+			}
+			GUIMDR.dataset=new Plink(genofiles);
+		}
+		dataset.read(GUIMDR.dataset);
 		
 		pnlGraphicalModel.setData(dataset);
 		pnlGraphicalModel.setModel(null);
@@ -690,6 +698,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		if (Isusescore.isSelected()) 
 		{
 			ArrayList instances = dataset.instances;
+			dataset.IsloadScore(true);
 			for (int i = 0; i < instances.size(); i++) {
 				((AbstractDataset.Instance) instances.get(i)).iniMU(((Double) score_data[i][0]).doubleValue());
 			}
@@ -698,7 +707,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			dataset.IsloadScore(false);
 		}
 		data=dataset;
-		datafiles=genofiles;
+///		datafiles=genofiles;
         int min=Integer.valueOf(mincount.getText());
         int max=Integer.valueOf(maxcount.getText());
         if (min>max) 
@@ -1145,7 +1154,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						txtphenopath.setText(phenofile.getAbsolutePath());
 						initData221();
 						///load pheno
-						table221=new JTable(data221,name221); 
+						table221=new ColumnSelectableJTable(data221,name221); 
+						table221.setEnabled(false);
 						scrollpane_table221=new JScrollPane(table221);
 						table221.setPreferredScrollableViewportSize(new Dimension(720,100));
 					    table221.setColumnSelectionAllowed(true);
@@ -1171,7 +1181,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 								data241[j][i]=data221[j][(int)index_table241.elementAt(i)];
 							}
 						}
-						table241=new JTable(data241,name241);
+						table241=new ColumnSelectableJTable(data241,name241);table241.setEnabled(false);
+						table241.setEnabled(false);
 						table241.setColumnSelectionAllowed(true);
 						table241.setRowSelectionAllowed(false);
 						scrollpane_table241=new JScrollPane(table241);
@@ -1191,7 +1202,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 								data242[j][i]=data221[j][(int)index_table242.elementAt(i)];
 							}
 						}
-						table242=new JTable(data242,name242);
+						table242=new ColumnSelectableJTable(data242,name242);table242.setEnabled(false);
+						table242.setEnabled(false);
 						scrollpane_table242=new JScrollPane(table242);
 						table242.setPreferredScrollableViewportSize(new Dimension(220,60));
 						table242.setColumnSelectionAllowed(true);
@@ -1218,7 +1230,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						data_2.add(data_double);
 					}
 					score_data = (Object[][]) data_2.toArray(new Object[data_2.size()][scoredata_head.length]);
-					JTable temp_table=new JTable(score_data,scoredata_head);
+					ColumnSelectableJTable temp_table=new ColumnSelectableJTable(score_data,scoredata_head);
 					JScrollPane scrollpane_temp_table=new JScrollPane(temp_table);
 					temp_table.setPreferredScrollableViewportSize(new Dimension(750,90));
 					temp_table.setColumnSelectionAllowed(true);
@@ -1486,7 +1498,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			 score_data[i][0]=residuals.get(i);
 		 }
 		 
-		JTable temp_table=new JTable(score_data,scoredata_head);
+		ColumnSelectableJTable temp_table=new ColumnSelectableJTable(score_data,scoredata_head);
 		JScrollPane scrollpane_temp_table=new JScrollPane(temp_table);
 		temp_table.setPreferredScrollableViewportSize(new Dimension(750,90));
 		temp_table.setColumnSelectionAllowed(true);
@@ -1582,11 +1594,12 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				}
 				scoredata_head[i]+=")";
 			}
-			JTable temp_table=new JTable(score_data,scoredata_head);
+			ColumnSelectableJTable temp_table=new ColumnSelectableJTable(score_data,scoredata_head);
 			JScrollPane scrollpane_temp_table=new JScrollPane(temp_table);
 			temp_table.setPreferredScrollableViewportSize(new Dimension(750,90));
 			temp_table.setColumnSelectionAllowed(true);
 			temp_table.setRowSelectionAllowed(false);
+			temp_table.setEnabled(false);
 			savescore.setEnabled(true);
 			Isusescore.setEnabled(true);
 			Isusescore.setSelected(true);
@@ -1903,7 +1916,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		if (Analysis.phenofile!=null) {
 			txtphenopath.setText(phenofile.getAbsolutePath());
 			initData221();
-			table221=new JTable(data221,name221); 
+			table221=new ColumnSelectableJTable(data221,name221); 
+			table221.setEnabled(false);
 			scrollpane_table221=new JScrollPane(table221);
 			table221.setPreferredScrollableViewportSize(new Dimension(720,100));
 		    table221.setColumnSelectionAllowed(true);
@@ -2073,7 +2087,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	public static void refresh() {
 		initData221();
 
-		table221=new JTable(data221,name221); 
+		table221=new ColumnSelectableJTable(data221,name221); 
+		table221.setEnabled(false);
 		scrollpane_table221=new JScrollPane(table221);
 		table221.setPreferredScrollableViewportSize(new Dimension(720,100));
 	    table221.setColumnSelectionAllowed(true);
@@ -2120,7 +2135,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						data241[j][i]=data221[j][(int)index_table241.elementAt(i)];
 					}
 				}
-				table241=new JTable(data241,name241);
+				table241=new ColumnSelectableJTable(data241,name241);
+				table241.setEnabled(false);
 				scrollpane_table241=new JScrollPane(table241);
 				table241.setColumnSelectionAllowed(true);
 				table241.setRowSelectionAllowed(false);
@@ -2165,7 +2181,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						data241[j][i]=data221[j][(int)index_table241.elementAt(i)];
 					}
 				}
-				table241=new JTable(data241,name241);
+				table241=new ColumnSelectableJTable(data241,name241);
+				table241.setEnabled(false);
 				table241.setColumnSelectionAllowed(true);
 				table241.setRowSelectionAllowed(false);
 				scrollpane_table241=new JScrollPane(table241);
@@ -2197,7 +2214,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						data242[j][i]=data221[j][(int)index_table242.elementAt(i)];
 					}
 				}
-				table242=new JTable(data242,name242);
+				table242=new ColumnSelectableJTable(data242,name242);table242.setEnabled(false);
 				scrollpane_table242=new JScrollPane(table242);
 				table242.setPreferredScrollableViewportSize(new Dimension(220,60));
 				table242.setColumnSelectionAllowed(true);
@@ -2243,7 +2260,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						data242[j][i]=data221[j][(int)index_table242.elementAt(i)];
 					}
 				}
-				table242=new JTable(data242,name242);
+				table242=new ColumnSelectableJTable(data242,name242);table242.setEnabled(false);
 				scrollpane_table242=new JScrollPane(table242);
 				table242.setPreferredScrollableViewportSize(new Dimension(220,60));
 				table242.setColumnSelectionAllowed(true);

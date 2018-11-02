@@ -30,6 +30,7 @@ import org.molgenis.genotype.plink.PedMapGenotypeData;
 import org.molgenis.genotype.variant.GeneticVariant;
 
 import GUI.GUIMDR;
+import GUI.NewFilter;
 import addon.imputation.Imputation;
 import gmdr.Main;
 public class Plink 
@@ -43,6 +44,7 @@ public class Plink
 	private String[][] Markers;
 	private int nsnp;
 	private int nind;
+	private int nChr;
 	private String[] SNPnames;
 	private double[] phe;
 	private int[] status;
@@ -58,6 +60,14 @@ public class Plink
         {
 			readfile(files);
 		}
+        String Chr[] = null;
+		try {
+			Chr = NewFilter.getchromid(files[0]);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        nChr=Chr.length;
 	}
 	
 	public String[] getSNPnames() 
@@ -91,6 +101,10 @@ public class Plink
 	{
 		return nind;
 	}
+	public int getChrNumber()
+	{
+		return nChr;
+	}
 	public int getSNPnum()
 	{
 		return nsnp;
@@ -115,6 +129,8 @@ public class Plink
 		stringline.append(status[i]);
 		return stringline.toString();
 	}
+	
+	
 	public static void main(String[] args) {
 		String[] files=new String[2];
 		files[0]="C:\\Users\\Hou59\\eclipse-workspace\\gmdr\\example\\example.ped";
@@ -122,6 +138,9 @@ public class Plink
 		//files[2]="C:\\Users\\Hou59\\eclipse-workspace\\gmdr\\example\\example.fam";
 		Plink plink=new Plink(files);
 	}
+	
+	
+	
 	private void readfile(String[] files) 
 	{	
 		for (int i = 0; i < files.length; i++) 
@@ -154,12 +173,12 @@ public class Plink
 		}
 		Vector<String> tmpSNPname=new Vector<>();
 		Vector<String[]> tmpmarkers=new Vector<>();
+		
 		for(GeneticVariant variant : genotypeData)
 		{
 			//Iterate over all variants
 		//	System.out.println(variant.getPrimaryVariantId());
 			tmpSNPname.add(variant.getPrimaryVariantId());
-		
 			Vector<String> marker_alleles=new Vector<>();
 			for(Alleles sampleAlleles : variant.getSampleVariants())
 			{

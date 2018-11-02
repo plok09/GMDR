@@ -10,12 +10,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.*;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -30,6 +34,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
+import org.molgenis.genotype.annotation.CaseControlAnnotation;
+
+import DataManage.Plink;
+
+import java.text.SimpleDateFormat;
 
 import gmdr.Main;
 
@@ -113,7 +123,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		setBackground(SystemColor.inactiveCaption);
 		initTop();
 		initpopmenu();
-		this.setTitle("Generalized Multifactor Dimensionality Reduction alpha V0.1");
+		this.setTitle("Generalized Multifactor Dimensionality Reduction V1.0");
 		this.setSize(1358,791);
 		this.setLocation(300, 30);//700,330
 		this.setVisible(true);
@@ -131,7 +141,10 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 	//	txtpnHistoryCommand.setDropMode(DropMode.ON);
 		txtpnHistoryCommand.setForeground(new Color(0, 255, 0));
 		txtpnHistoryCommand.setBackground(Color.BLACK);
-		txtpnHistoryCommand.setText("History Command :\n");
+		
+		LocalDateTime currentTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		txtpnHistoryCommand.setText(currentTime.format(formatter)+"\nHistory Command :\n");
 		
 		StyleConstants.setForeground(keyWordfailed, Color.RED);
 		StyleConstants.setForeground(keyWordsuccessed, Color.GREEN);
@@ -146,7 +159,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)));
 	    fileTree.setModel(model);
 	    fileTree.setCellRenderer(new FileTreeRenderer());
-	    fileTree.addMouseListener(new mouse_actionadapter(this));
+	    fileTree.addMouseListener(new mouseinfiletree_actionadapter(this));
 	    
 	    
 	    
@@ -233,14 +246,15 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				  FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)),myNewProject.getProjectpath());
 		          fileTree.setModel(model);
 		          fileTree.setCellRenderer(new FileTreeRenderer());
-					GUIMDR.open=0;
-				}     
+				  GUIMDR.open=0;
 				try {
 					doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tCreating project in "+GUIMDR.project_path+"\tSuccessed.\n",keyWordsuccessed);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				}     
+				
 			}
 			break;
 		case "Open":
@@ -263,7 +277,8 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 					{
 						e3.printStackTrace();
 					}
-					Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();  
+					Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();    
+					int flag=0;
 			        while (it.hasNext()) {  
 			            Map.Entry<String, String> entry =  it.next();  
 			            String key = entry.getKey();  
@@ -281,6 +296,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 							}
 							continue;
 						}
+			          
 			            switch (key) {
 						case "bed":
 							GUIMDR.name_bed=new File(value);
@@ -292,6 +308,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
+							flag-=1;
 							break;
 						case "bim":
 							GUIMDR.name_bim=new File(value);
@@ -303,6 +320,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 							}
 							this.ToolsMenuItem[0].setEnabled(true);
 							this.DataMenuItem[1].setEnabled(true);
+							flag-=1;
 							break;
 						case "fam":
 							GUIMDR.name_fam=new File(value);
@@ -314,6 +332,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 							}
 							this.ToolsMenuItem[0].setEnabled(true);
 							this.DataMenuItem[1].setEnabled(true);
+							flag-=1;
 							break;
 						case "ped":
 							GUIMDR.name_ped=new File(value);
@@ -324,7 +343,9 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 								e1.printStackTrace();
 							}
 							this.ToolsMenuItem[0].setEnabled(true);
+							flag+=1;
 							break;
+							
 						case "map":
 							GUIMDR.name_map=new File(value);
 							try {
@@ -335,6 +356,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 							}
 							this.ToolsMenuItem[0].setEnabled(true);
 							this.DataMenuItem[1].setEnabled(true);
+							flag+=1;
 							break;	
 							
 						case "phe":
@@ -351,7 +373,31 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 							Analysis.refresh();
 							break;
 						}
-			        }  
+			        } 
+			        if (flag==-3) 
+			        {
+			        	String[] files=new String[3];
+						files[0]=GUIMDR.name_bed.getAbsolutePath();
+						files[1]=GUIMDR.name_bim.getAbsolutePath();
+						files[2]=GUIMDR.name_fam.getAbsolutePath();
+						GUIMDR.dataset=new Plink(files);
+					}
+			        else if (flag==2) 
+			        	{
+				        	String[] files=new String[2];
+							files[0]=GUIMDR.name_ped.getAbsolutePath();
+							files[1]=GUIMDR.name_map.getAbsolutePath();
+							GUIMDR.dataset=new Plink(files);
+			        	}else 
+			        	{
+			        		try {
+								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading Genotyoe date failed.\n",keyWordfailed);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+			        
 					this.DataMenuItem[1].updateUI();
 					this.ToolsMenuItem[0].updateUI();
 					
@@ -383,6 +429,39 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				e2.printStackTrace();
 			}
 			break;
+		case "Summary Statistics":
+			if ((!GUIMDR.name_bed.isFile()|!GUIMDR.name_bim.isFile()|!GUIMDR.name_fam.isFile())&&(!GUIMDR.name_ped.isFile()|!GUIMDR.name_map.isFile())) 
+			{
+					JOptionPane.showMessageDialog(null,"Please input  Genotype Files");
+					try {
+						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tTry to summarize the genotype Failed\n", GUIMDR.myUI.keyWordfailed);
+						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), "\t\tGenotype Files is not existed\n", GUIMDR.myUI.keyWordfailed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					return;
+			} 
+			if (GUIMDR.dataset==null)
+			{
+				String[] genofiles;
+				if(GUIMDR.name_bed.getName()=="")
+				{
+					genofiles=new String[2];
+					genofiles[0]=new String(GUIMDR.name_ped.getAbsolutePath());
+					genofiles[1]=new String(GUIMDR.name_map.getAbsolutePath());
+				}
+				else
+				{
+					genofiles=new String[3];
+					genofiles[0]=new String(GUIMDR.name_bed.getAbsolutePath());
+					genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
+					genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
+				}
+				GUIMDR.dataset=new Plink(genofiles);
+			}
+			SummaryStatisticsFrame statisticsFrame=new SummaryStatisticsFrame();
+			break;
 		case "Save":	
 			Saveingproject(GUIMDR.gmdrini_path);
 			try {
@@ -413,25 +492,36 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		}
 			break;
 		case "View File":
-		/*	try 
+				ViewFile vf=new ViewFile();
+			break;
+		case "About":
+			AboutFrame aboutFrame=new AboutFrame();
+			break;
+		case "Help":
+			if (Desktop.isDesktopSupported())
 			{
-				BEDtoTXT bed_to_txt=new BEDtoTXT(GMDR.name_bed,GMDR.name_bim,GMDR.name_fam);
-			} catch (IOException e1) 
-			{
-				e1.printStackTrace();
+				File myFile = new File("manual.pdf");
+				if (myFile.isFile()) 
+				{
+					 try {
+					      Desktop.getDesktop().open(myFile);
+					    } catch (IOException ex) 
+					 {
+					        // no application registered for PDFs
+					    	}
+				}else 
+				{
+					JOptionPane.showMessageDialog(null, "Cannot find the manual at "+System.getProperty("user.dir")+"/example/manual.pdf", "Eorr",JOptionPane.YES_OPTION );
+				    
+				}
 			}
-			File bed=new File(GMDR.name_bed.getAbsolutePath());
-	        File bim=new File(GMDR.name_bim.getAbsolutePath());
-	        File fam=new File(GMDR.name_fam.getAbsolutePath());
-	        File txt=new File("hapmap.ped");
-	        */
-			ViewFile vf=new ViewFile();
+			break;
 		default:
 			break;
 		}
 	}
 
-	public void mouseclicked_actionPerformed(MouseEvent e) 
+	public void mouseclickedinfiletree_actionPerformed(MouseEvent e) 
 	{
 		
 		int n=fileTree.getRowForLocation(e.getX(),e.getY());
@@ -442,6 +532,18 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		if (e.getButton()==MouseEvent.BUTTON3&&fileTree.getSelectionPath()!=null) 
 		{
 			popupMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+		
+	}
+	
+	public void mouseclickedinbar_actionPerformed(MouseEvent e) 
+	{
+		
+		if(e.getSource()==menu[3])
+		{
+			    Analysis analysis=new Analysis();
+				this.setVisible(false);
+				//this.setExtendedState(JFrame.ICONIFIED);
 		}
 		
 	}
@@ -923,17 +1025,17 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		}
 		
 	}
-	class mouse_actionadapter implements MouseListener
+	class mouseinfiletree_actionadapter implements MouseListener
 	{
 		UI adaptee;
-		public mouse_actionadapter(UI adaptee) {
+		public mouseinfiletree_actionadapter(UI adaptee) {
 			// TODO Auto-generated constructor stub
 			this.adaptee=adaptee;
 		}
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			// TODO Auto-generated method stub
-			adaptee.mouseclicked_actionPerformed(e);
+			adaptee.mouseclickedinfiletree_actionPerformed(e);
 		}
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
@@ -957,6 +1059,42 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		}
 		
 	}
+	class mouseinbar_actionadapter implements MouseListener
+	{
+		UI adaptee;
+		public mouseinbar_actionadapter(UI adaptee) {
+			// TODO Auto-generated constructor stub
+			this.adaptee=adaptee;
+		}
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			adaptee.mouseclickedinbar_actionPerformed(arg0);
+		}
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
+	
+	
 	
 	public void initTop()
 	{
@@ -999,7 +1137,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			HelpMenuItem[i].addActionListener(this);
 			menu[5].add(HelpMenuItem[i]);
 		}
-		menu[3].addMenuListener(this);
+		menu[3].addMouseListener(new mouseinbar_actionadapter(this));
 		DataMenuItem[1].setEnabled(false);
 	}
 	
@@ -1009,12 +1147,12 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 
 	public void menuSelected(MenuEvent e) 
 	{
-		if(e.getSource()==menu[3])
-		{
-		    Analysis analysis=new Analysis();
-			this.setVisible(false);
+//		if(e.getSource()==menu[3])
+//		{
+//		    Analysis analysis=new Analysis();
+//			this.setVisible(false);
 			//this.setExtendedState(JFrame.ICONIFIED);
-		}
+//		}
 	}
 
 	public void menuDeselected(MenuEvent e) {

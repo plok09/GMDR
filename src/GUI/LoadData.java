@@ -13,6 +13,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 
+import DataManage.Plink;
 import gmdr.Main;
 
 public class LoadData extends JFrame implements ItemListener,ActionListener,ChangeListener
@@ -90,6 +91,8 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 	
 	public LoadData()
 	{
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setResizable(false);
 		setTitle("Input Data");
 		if(GUIMDR.name_file!=null)
 		{
@@ -184,23 +187,34 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		BinaryInput.add(pnlbinfilechoose, BorderLayout.CENTER);
 		pnlbinfilechoose.setLayout(new GridLayout(0, 1, 0, 0));
 		pnlbinfilechoose.add(pnlbedfilechoose);
-		pnlbedfilechoose.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		pnlbedfilechoose.setLayout(null);
+		labelbed.setBounds(10, 10, 39, 14);
 		labelbed.setVerticalAlignment(SwingConstants.TOP);
 		labelbed.setHorizontalAlignment(SwingConstants.LEFT);
 		pnlbedfilechoose.add(labelbed);
+		txabedfilepath.setBounds(59, 5, 494, 19);
 		pnlbedfilechoose.add(txabedfilepath);
+		btnbedbrowse.setBounds(561, 6, 67, 23);
 		pnlbedfilechoose.add(btnbedbrowse);
 		pnlbinfilechoose.add(pnlbimfilechoose);
+		pnlbimfilechoose.setLayout(null);
+		labelbim.setBounds(10, 10, 37, 14);
 		
 		
 		pnlbimfilechoose.add(labelbim);
+		txabinfilepath.setBounds(57, 5, 494, 23);
 		pnlbimfilechoose.add(txabinfilepath);
+		btnbinbrowse.setBounds(561, 6, 67, 23);
 		pnlbimfilechoose.add(btnbinbrowse);
 		pnlbinfilechoose.add(pnlfamfilechoose);
+		pnlfamfilechoose.setLayout(null);
+		labelfam.setBounds(10, 10, 39, 14);
 		
 		
 		pnlfamfilechoose.add(labelfam);
+		txafamfilepath.setBounds(59, 5, 492, 23);
 		pnlfamfilechoose.add(txafamfilepath);
+		btnfambrowse.setBounds(561, 6, 67, 23);
 		pnlfamfilechoose.add(btnfambrowse);
 		btnfambrowse.addActionListener(this);
 		btnbinbrowse.addActionListener(this);
@@ -232,14 +246,22 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		StandardInput.add(pnlstandardfilechoose, BorderLayout.CENTER);
 		pnlstandardfilechoose.setLayout(new GridLayout(0, 1, 0, 0));
 		pnlstandardfilechoose.add(pnlstandardpedfilechoose);
+		pnlstandardpedfilechoose.setLayout(null);
+		labelped.setBounds(10, 10, 39, 14);
 		
 		pnlstandardpedfilechoose.add(labelped);
+		txapedfilepath.setBounds(59, 5, 492, 24);
 		pnlstandardpedfilechoose.add(txapedfilepath);
+		btnpedbrowse.setBounds(561, 6, 67, 23);
 		pnlstandardpedfilechoose.add(btnpedbrowse);
 		pnlstandardfilechoose.add(pnlstandardmapfilechoose);
+		pnlstandardmapfilechoose.setLayout(null);
+		labelmap.setBounds(10, 10, 41, 14);
 		
 		pnlstandardmapfilechoose.add(labelmap);
+		txamapfilepath.setBounds(61, 5, 490, 24);
 		pnlstandardmapfilechoose.add(txamapfilepath);
+		btnmapbrowse.setBounds(561, 6, 67, 23);
 		pnlstandardmapfilechoose.add(btnmapbrowse);	
 		btnmapbrowse.addActionListener(this);
 		btnpedbrowse.addActionListener(this);
@@ -247,10 +269,15 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 
 	public void initAleternatePhenotype()
 	{
+		ckusepheno.setBounds(6, 16, 21, 21);
 		ckusepheno.addItemListener(this);
+		pnlpheno.setLayout(null);
 		pnlpheno.add(ckusepheno);
+		labelpheno.setBounds(33, 16, 127, 14);
 		pnlpheno.add(labelpheno);
+		txaphenofilepath.setBounds(170, 15, 381, 22);
 		pnlpheno.add(txaphenofilepath);
+		btnphenobrowse.setBounds(561, 14, 67, 23);
 		btnphenobrowse.addActionListener(this);
 		pnlpheno.add(btnphenobrowse);
 		
@@ -369,6 +396,15 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 			GUIMDR.name_map=new File("");
 			GUIMDR.name_phe=new File("");
 			GUIMDR.open=0;
+			if (!txabedfilepath.getText().equals("")&&!txafamfilepath.getText().equals("")&&!txabinfilepath.getText().equals("")) 
+			{
+				binary=true;
+			}
+			if (!txamapfilepath.getText().equals("")&&!txapedfilepath.getText().equals("")) 
+			{
+				binary=false;
+			}
+			
 			if(binary)
 			{
 				if (GUIMDR.gmdrini.containsKey("ped")||GUIMDR.gmdrini.containsKey("map")) 
@@ -469,9 +505,6 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					
-					
-					this.dispose();
 				}
 				else
 				{
@@ -545,9 +578,13 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 						e1.printStackTrace();
 					}
 		
-					this.dispose();
+					
 				}
-				
+				String[] files=new String[3];
+				files[0]=GUIMDR.name_bed.getAbsolutePath();
+				files[1]=GUIMDR.name_bim.getAbsolutePath();
+				files[2]=GUIMDR.name_fam.getAbsolutePath();
+				GUIMDR.dataset=new Plink(files);
 			}
 			else
 			{
@@ -684,8 +721,12 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 					
 					
 				}
+				String[] files=new String[2];
+				files[0]=GUIMDR.name_ped.getAbsolutePath();
+				files[1]=GUIMDR.name_map.getAbsolutePath();
+				GUIMDR.dataset=new Plink(files);
 				//SimpleTheData thedata=new SimpleTheData(GMDR.name_ped.getAbsolutePath(),GMDR.name_map.getAbsolutePath());
-				this.dispose();
+				
 			}
 			
 			if (UsePhe) {
@@ -715,10 +756,12 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				}					
 				Analysis.txtphenopath.setText(txaphenofilepath.getText());
 				Analysis.refresh();
+				
 			}
 			
 			GUIMDR.myUI.DataMenuItem[1].setEnabled(true);
-			GUIMDR.myUI.ToolsMenuItem[0].setEnabled(true);;
+			GUIMDR.myUI.ToolsMenuItem[0].setEnabled(true);
+			this.dispose();
 		}
 		if(temp_button==buttonNo)
 		{
@@ -814,7 +857,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 	public void stateChanged(ChangeEvent e) 
 	{
 		int index=tabpanel.getSelectedIndex();
-		switch(index)
+/*		switch(index)
 		{
 		case 0:
 			binary=true;
@@ -828,7 +871,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 			break;
 		default:
 			break;
-		}
+		}*/
 	}
 }
 
