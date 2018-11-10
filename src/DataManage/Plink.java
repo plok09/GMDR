@@ -19,15 +19,8 @@ import javax.swing.JOptionPane;
 import javax.swing.text.BadLocationException;
 import javax.xml.crypto.Data;
 
-import org.broadinstitute.variant.variantcontext.Genotype;
-import org.molgenis.genotype.Alleles;
-import org.molgenis.genotype.GenotypeData;
-import org.molgenis.genotype.GenotypeDataException;
-import org.molgenis.genotype.GenotypeInfo;
-import org.molgenis.genotype.Sample;
-import org.molgenis.genotype.plink.BedBimFamGenotypeData;
-import org.molgenis.genotype.plink.PedMapGenotypeData;
-import org.molgenis.genotype.variant.GeneticVariant;
+
+
 
 import GUI.GUIMDR;
 import GUI.NewFilter;
@@ -35,12 +28,12 @@ import addon.imputation.Imputation;
 import gmdr.Main;
 public class Plink 
 {
-	private String pedfile;
-	private String mapfile;
-	private String bedfile;
-	private String famfile;
-	private String bimfile;
-	private String phefile;
+	private String pedfile=null;
+	private String mapfile=null;
+	private String bedfile=null;
+	private String famfile=null;
+	private String bimfile=null;
+	private String phefile=null;
 	private String[][] Markers;
 	private int nsnp;
 	private int nind;
@@ -48,7 +41,7 @@ public class Plink
 	private String[] SNPnames;
 	private double[] phe;
 	private int[] status;
-	public Plink(String[] files)
+	public Plink(String[] files) throws IOException
 	{
 		 int i=files[0].lastIndexOf(".");
 	     String a=files[0].substring(i+1);
@@ -131,17 +124,17 @@ public class Plink
 	}
 	
 	
-	public static void main(String[] args) {
-		String[] files=new String[2];
-		files[0]="C:\\Users\\Hou59\\eclipse-workspace\\gmdr\\example\\example.ped";
-		files[1]="C:\\Users\\Hou59\\eclipse-workspace\\gmdr\\example\\example.map";
-		//files[2]="C:\\Users\\Hou59\\eclipse-workspace\\gmdr\\example\\example.fam";
+	public static void main(String[] args) throws IOException {
+		String[] files=new String[3];
+		files[0]="D:\\Java Respo\\GMDR\\example\\example.bed";
+		files[1]="";
+		files[2]="";
 		Plink plink=new Plink(files);
 	}
 	
 	
 	
-	private void readfile(String[] files) 
+	private void readfile(String[] files) throws IOException 
 	{	
 		for (int i = 0; i < files.length; i++) 
 		{
@@ -156,79 +149,29 @@ public class Plink
 				break;
 			}
 		}
-		GenotypeData genotypeData=null;
-		try {
-			 genotypeData=new PedMapGenotypeData(new File(pedfile), new File(mapfile));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (GenotypeDataException ex) {
-			JOptionPane.showMessageDialog(new JFrame(), ex.getMessage()+"\nPlease check the genotype files.","Error",JOptionPane.ERROR_MESSAGE);
-			try {
-				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\t"+ ex.getMessage()+"\n", GUIMDR.myUI.keyWordfailed);
-			} catch (BadLocationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		Vector<String> tmpSNPname=new Vector<>();
-		Vector<String[]> tmpmarkers=new Vector<>();
-		
-		for(GeneticVariant variant : genotypeData)
-		{
-			//Iterate over all variants
-		//	System.out.println(variant.getPrimaryVariantId());
-			tmpSNPname.add(variant.getPrimaryVariantId());
-			Vector<String> marker_alleles=new Vector<>();
-			for(Alleles sampleAlleles : variant.getSampleVariants())
-			{
-				//Iterate over the alleles form all samples.
-				marker_alleles.add(String.join(" ",sampleAlleles.getAllelesAsString()));
-			}
-			String[] snpalleles=new String[marker_alleles.size()];
-			marker_alleles.toArray(snpalleles);
-			tmpmarkers.add(snpalleles);
-		}
-		nsnp=tmpSNPname.size();
-		nind=tmpmarkers.get(0).length;
-		Markers=new String[nind][nsnp];
-		SNPnames=new String[nsnp];
-		tmpSNPname.toArray(SNPnames);
-		for(int i=0;i<nsnp;i++)
-		{
-			for(int j=0;j<nind;j++)
-			{
-				if (tmpmarkers.get(i)[j].equals("0 0")) 
-				{
-					Markers[j][i]=". .";
-				}else 
-				{
-					Markers[j][i]=tmpmarkers.get(i)[j];
-				}
-			}
-		}
-		phe=new double[nind];
+		PedMapReader genotypeData=new PedMapReader(pedfile, mapfile);
+		nsnp=genotypeData.GetNumSNP();
+		nind=genotypeData.GetNumInds();
+		Markers=genotypeData.GetMarkerbyInd();
+		SNPnames=genotypeData.GetSNPsName();
+		phe=genotypeData.GetPhes();
 		status=new int[nind];
-		int id=0;
-		for(Sample sample : genotypeData.getSamples()){
-			//Note sex is an enum, to string outputs a human readable form of the gender
-			phe[id]= (double) sample.getAnnotationValues().get("phenotype");
-			status[id]= (int)phe[id];
-			id++;
+		for(int i=0;i<phe.length;i++)
+		{
+			status[i]=(int)phe[i];
 		}
-	  try {
-		genotypeData.close();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+		
 	}
 
 	
-	private void readbfile(String[] files) 
+	private void readbfile(String[] files) throws IOException 
 	{
 		for (int i = 0; i < files.length; i++) 
 		{
+			if (files[i].equals(""))
+			{
+				continue;
+			}
 			int dot=files[i].lastIndexOf(".");
 			String extension=files[i].substring(dot+1);
 			switch (extension) {
@@ -243,79 +186,19 @@ public class Plink
 				break;
 			}
 		}
-		GenotypeData genotypeData=null;
-		try {
-			 genotypeData=new BedBimFamGenotypeData(new File(bedfile), new File(bimfile), new File(famfile), 1000);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			try {
-				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\t"+e.getMessage(), GUIMDR.myUI.keyWordfailed);
-			} catch (BadLocationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}catch (GenotypeDataException ex) {
-			JOptionPane.showMessageDialog(new JFrame(), ex.getMessage()+"\nPlease check the genotype files.","Error",JOptionPane.ERROR_MESSAGE);
-			try {
-				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\t"+ ex.getMessage()+"\n", GUIMDR.myUI.keyWordfailed);
-			} catch (BadLocationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		Vector<String> tmpSNPname=new Vector<>();
-		Vector<String[]> tmpmarkers=new Vector<>();
-		for(GeneticVariant variant : genotypeData)
-		{
-			//Iterate over all variants
-		//	System.out.println(variant.getPrimaryVariantId());
-			tmpSNPname.add(variant.getPrimaryVariantId());
 		
-			Vector<String> marker_alleles=new Vector<>();
-			for(Alleles sampleAlleles : variant.getSampleVariants())
-			{
-				//Iterate over the alleles form all samples.
-				marker_alleles.add(String.join(" ",sampleAlleles.getAllelesAsString()));
-			}
-			String[] snpalleles=new String[marker_alleles.size()];
-			marker_alleles.toArray(snpalleles);
-			tmpmarkers.add(snpalleles);
-		}
-		nsnp=tmpSNPname.size();
-		nind=tmpmarkers.get(0).length;
-		Markers=new String[nind][nsnp];
-		SNPnames=new String[nsnp];
-		tmpSNPname.toArray(SNPnames);
-		for(int i=0;i<nsnp;i++)
-		{
-			for(int j=0;j<nind;j++)
-			{
-				if (tmpmarkers.get(i)[j].equals("0 0")) 
-				{
-					Markers[j][i]=". .";
-				}else 
-				{
-					Markers[j][i]=tmpmarkers.get(i)[j];
-				}
-			}
-				
-		}
-		phe=new double[nind];
+		BedBimFamReader genotypeData=new BedBimFamReader(bedfile, bimfile, famfile);
+	
+		nsnp=genotypeData.GetNumSNP();
+		nind=genotypeData.GetNumInds();
+		Markers=genotypeData.GetMarkerbyInd();
+		SNPnames=genotypeData.GetSNPsName();
+		phe=genotypeData.GetPhes();
 		status=new int[nind];
-		int id=0;
-		for(Sample sample : genotypeData.getSamples()){
-			//Note sex is an enum, to string outputs a human readable form of the gender
-			phe[id]= (double) sample.getAnnotationValues().get("phenotype");
-			status[id]= (int)phe[id];
-			id++;
+		for(int i=0;i<phe.length;i++)
+		{
+			status[i]=(int)phe[i];
 		}
-	  
-	try {
-		genotypeData.close();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}	
 	}
 	
 } 

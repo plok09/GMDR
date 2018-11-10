@@ -28,8 +28,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 
-import org.apache.bcel.generic.NEW;
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.apache.commons.math3.geometry.spherical.oned.ArcsSet.Split;
 import org.epistasis.AbstractDataset;
 import org.epistasis.FileSaver;
@@ -57,7 +55,6 @@ import org.epistasis.gui.ProgressPanelUpdater;
 import org.epistasis.gui.ReadOnlyTableModel;
 import org.epistasis.gui.SwingInvoker;
 import org.epistasis.gui.TextComponentUpdaterThread;
-import org.molgenis.genotype.annotation.CaseControlAnnotation;
 
 import DataManage.Dataset;
 import DataManage.Plink;
@@ -68,8 +65,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.GroupLayout.Alignment;
-import net.miginfocom.swing.MigLayout;
-import net.sf.picard.analysis.CollectMultipleMetrics.ProgramInterface;
 
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -204,7 +199,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	private JButton bntrunscorecalc=new JButton("Run");
 	private JPanel pnlselectedresidual=new JPanel();
 	private JPanel pnldealresidual=new JPanel();
-	private JCheckBox Isusescore=new JCheckBox("Use Residual");
+	private static JCheckBox Isusescore=new JCheckBox("Use Residual");
 	private JPanel pnlresidual_path=new JPanel();
 	private JButton savescore=new JButton("Save");
 	
@@ -637,7 +632,12 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			adaptee.cmdRunAnalysis_actionPerformed(e);
+			try {
+				adaptee.cmdRunAnalysis_actionPerformed(e);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 
@@ -653,9 +653,9 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		}
 	}
  
-	public void cmdRunAnalysis_actionPerformed(ActionEvent e) {
+	public void cmdRunAnalysis_actionPerformed(ActionEvent e) throws IOException {
 		
-		if ((!GUIMDR.name_bed.isFile()|!GUIMDR.name_bim.isFile()|!GUIMDR.name_fam.isFile())&&(!GUIMDR.name_ped.isFile()|!GUIMDR.name_map.isFile())) 
+		if ((!GUIMDR.name_bed.isFile()|!GUIMDR.name_fam.isFile())&&(!GUIMDR.name_ped.isFile())) 
 		{
 				JOptionPane.showMessageDialog(null,"Please input  Genotype Files");
 				try {
@@ -833,15 +833,14 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		try {
 			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tRun GMDR analysis \n",GUIMDR.myUI.keyWordsuccessed);
 			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tparameter :\n ",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tmin: "+mincount.getText()+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tmax: "+maxcount.getText()+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tcv: "+cv.getText()+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tpermutation: "+permutation.getText()+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tis paired: "+(ispaired.isSelected()?"True":"False")+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tTie Cells: "+tie.getSelectedItem()+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tCompute fitness landscape: "+(landscape.isSelected()?"True":"False")+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tCompute fitness landscape: "+(landscape.isSelected()?"True":"False")+"\n",GUIMDR.myUI.keyWordsuccessed);
-			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tSearch Type: "+searchtype.getSelectedItem()+"\n",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tUsing Residual: True;",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tMarker Count Range: min: "+mincount.getText()+" max: "+maxcount.getText()+";",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tCross Validation Count: "+cv.getText()+";\n",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tpermutation: "+permutation.getText()+";",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tIs paired: "+(ispaired.isSelected()?"True":"False")+";",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\t\tTie Cells: "+tie.getSelectedItem()+";\n",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tCompute fitness landscape: "+(landscape.isSelected()?"True":"False")+";",GUIMDR.myUI.keyWordsuccessed);
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\tSearch Type: "+searchtype.getSelectedItem()+";\n",GUIMDR.myUI.keyWordsuccessed);
 			if (searchtype.getSelectedIndex()==1) {
 				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tForced marker combination: "+searchtypetext.getText()+"\n",GUIMDR.myUI.keyWordsuccessed);
 
@@ -1383,6 +1382,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			 choose=new JFileChooser();
 		}
 		choose.setFileFilter(filter);
+		choose.setAcceptAllFileFilterUsed(true);
 		choose.showSaveDialog(new JPanel());
         String residual_path=choose.getSelectedFile().getPath()+".residual";
 		File temp_file=new File(residual_path);
@@ -1907,7 +1907,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		pnldealresidual.add(Isusescore);
 		Isusescore.setEnabled(false);
 		pnldealresidual.add(pnlresidual_path);
-		pnlresidual_path.setPreferredSize(new Dimension(560, 29));
+		pnlresidual_path.setPreferredSize(new Dimension(550, 29));
 		pnlresidual_path.setLayout(new GridLayout(0, 1, 0, 0));
 		txascorefile.setBackground(UIManager.getColor("Button.background"));
 		
@@ -2106,8 +2106,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	private void resetForm() {
 		dtmSummaryTable.setRowCount(0);
 //		prgFilterProgress.setValue(unfiltered == null ? 0 : 1);
-		Isusescore.setSelected(false);
-		Isusescore.updateUI();
+//		Isusescore.setSelected(false);
+//		Isusescore.updateUI();
 		clearTabs();
 		tpnResults.setSelectedIndex(0);
 	}
@@ -2387,7 +2387,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				temp=read_number.readLine();
 			}
 		} catch (IOException e) {
-			// TODO �Զ����ɵ� catch ��
+			// TODO 锟皆讹拷锟斤拷锟缴碉拷 catch 锟斤拷
 			e.printStackTrace();
 		}
 		
@@ -2406,7 +2406,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				data221[i]=tmp1.split("\t");;
 			}
 		} catch (IOException e) {
-			// TODO �Զ����ɵ� catch ��
+			// TODO 锟皆讹拷锟斤拷锟缴碉拷 catch 锟斤拷
 			e.printStackTrace();
 		}
 		
@@ -2468,7 +2468,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			
 			
 		} catch (IOException e1) {
-			// TODO �Զ����ɵ� catch ��
+			// TODO 锟皆讹拷锟斤拷锟缴碉拷 catch 锟斤拷
 			e1.printStackTrace();
 		}
 	/*	try
@@ -2507,7 +2507,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		// TODO �Զ����ɵķ������
+		// TODO 锟皆讹拷锟斤拷锟缴的凤拷锟斤拷锟斤拷锟�
 		
 	}
 }

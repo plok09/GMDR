@@ -10,8 +10,6 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 
-import org.apache.tools.ant.taskdefs.email.Message;
-
 import addon.score.cal.*;
 /**
  *

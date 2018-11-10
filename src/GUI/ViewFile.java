@@ -70,7 +70,7 @@ public class ViewFile extends JFrame implements ActionListener {
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 		
 		
-		if (!GUIMDR.name_bed.getName().equals("")) 
+		if (!GUIMDR.name_bed.getName().equals("NULL")) 
 		{
 		//	File a=new File("C:\\Users\\Administrator\\Desktop\\example\\example.bed");
 			
@@ -80,7 +80,7 @@ public class ViewFile extends JFrame implements ActionListener {
 
 			
 		}
-		if (!GUIMDR.name_bim.getName().equals("")) 
+		if (!GUIMDR.name_bim.getName().equals("NULL")) 
 		{
 			
 			ReadBim=GUIMDR.name_bim;
@@ -105,7 +105,7 @@ public class ViewFile extends JFrame implements ActionListener {
 			Bim_File.add(scrollPane, BorderLayout.CENTER);
 			
 		}
-		if (!GUIMDR.name_fam.getName().equals("")) 
+		if (!GUIMDR.name_fam.getName().equals("NULL")) 
 		{
 			
 			ReadFam=GUIMDR.name_fam;
@@ -136,7 +136,7 @@ public class ViewFile extends JFrame implements ActionListener {
 			
 		}
 
-		if (!GUIMDR.name_map.getName().equals("")) 
+		if (!GUIMDR.name_map.getName().equals("NULL")) 
 		{
 			
 		
@@ -166,7 +166,7 @@ public class ViewFile extends JFrame implements ActionListener {
 			Map_File.add(scrollPane, BorderLayout.CENTER);
 			
 		}
-		if (!GUIMDR.name_ped.getName().equals("")) 
+		if (!GUIMDR.name_ped.getName().equals("NULL")) 
 		{	
 		
 			ReadPed=GUIMDR.name_ped;

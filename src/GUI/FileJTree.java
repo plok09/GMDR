@@ -4,7 +4,11 @@ import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.BadLocationException;
 import javax.swing.tree.*;
+
+import gmdr.Main;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,9 +16,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 
-public class FileTreeTest {
+public class FileJTree {
     public static void main(String[] args){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -24,7 +35,7 @@ public class FileTreeTest {
                 FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)));
                 fileTree.setModel(model);
                 fileTree.setCellRenderer(new FileTreeRenderer());
-
+           //     frame.getContentPane().setCursor(new Cursor(Cursor.WAIT_CURSOR));
                 frame.getContentPane().add(new JScrollPane(fileTree), BorderLayout.CENTER);
                 
 
@@ -37,72 +48,22 @@ public class FileTreeTest {
     }
 }
 
-class FileTree extends JTree {
+class FileTree extends JTree 
+{
     public TreePath mouseInPath;
     protected FileSystemView fileSystemView = FileSystemView.getFileSystemView();
   
     public FileTree(){
         setRootVisible(false);
-        addTreeWillExpandListener(new TreeWillExpandListener() {
-            @Override
-            public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
-                DefaultMutableTreeNode lastTreeNode =(DefaultMutableTreeNode) event.getPath().getLastPathComponent();
-                FileNode fileNode = (FileNode) lastTreeNode.getUserObject();
-                if (!fileNode.isInit) {
-                    File[] files;
-                    if (fileNode.isDummyRoot) {
-                        files = fileSystemView.getRoots();
-                    } else {
-                        files = fileSystemView.getFiles(
-                                ((FileNode) lastTreeNode.getUserObject()).file,
-                                false);
-                    }
-                    for (int i = 0; i < files.length; i++) {
-                        FileNode childFileNode = new FileNode(
-                                fileSystemView.getSystemDisplayName(files[i]),
-                                fileSystemView.getSystemIcon(files[i]), files[i],
-                                false);
-                        DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(childFileNode);
-                        lastTreeNode.add(childTreeNode);
-                    }
-                    //é€šçŸ¥æ¨¡åž‹èŠ‚ç‚¹å�‘ç”Ÿå�˜åŒ–
-                    DefaultTreeModel treeModel1 = (DefaultTreeModel) getModel();
-                    treeModel1.nodeStructureChanged(lastTreeNode);
-                }
-                //æ›´æ”¹æ ‡è¯†ï¼Œé�¿å…�é‡�å¤�åŠ è½½
-                fileNode.isInit = true;
-            }
-            @Override
-            public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
-
-            }
-        });
-      
-  /*      addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                TreePath path=getPathForLocation(e.getX(), e.getY());
-
-                if(path!=null){
-                    if(mouseInPath!=null){
-                        Rectangle oldRect=getPathBounds(mouseInPath);
-                        mouseInPath=path;
-                        repaint(getPathBounds(path).union(oldRect));
-                    }else{
-                        mouseInPath=path;
-                        Rectangle bounds=getPathBounds(mouseInPath);
-                        repaint(bounds);
-                    }
-                }else if(mouseInPath!=null){
-                    Rectangle oldRect=getPathBounds(mouseInPath);
-                    mouseInPath=null;
-                    repaint(oldRect);
-                }
-            }
-        });*/
     }
-    
+    public FileSystemView getFileSystemView()
+    {
+		return fileSystemView;
+	}
+   
 }
+
+
 class FileNode{
     public FileNode(String name,Icon icon,File file,boolean isDummyRoot){
         this.name=name;this.icon=icon;this.file=file;this.isDummyRoot=isDummyRoot;

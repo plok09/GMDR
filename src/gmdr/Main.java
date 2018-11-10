@@ -1,6 +1,8 @@
 package gmdr;
 
 import java.awt.Font;
+import java.awt.Insets;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -65,7 +67,7 @@ public class Main {
 		nf = df;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (args.length > 0) {
 			Console.main(args);
 		} else {
@@ -73,6 +75,8 @@ public class Main {
 
 		    try {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				UIManager.put("MenuItem.margin", new Insets(2, -22, 2, 1));
+
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 					| UnsupportedLookAndFeelException e) {
 				// TODO Auto-generated catch block

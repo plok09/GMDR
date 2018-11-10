@@ -306,7 +306,7 @@ public abstract class AbstractDataset extends AbstractList implements Cloneable 
 		}
 		// cgb end
 	}
-	public void read(String[]  filename)
+	public void read(String[]  filename) throws IOException
 	{
 		ArrayList<ArrayList> missingGenotypeInformation = new ArrayList();
 		clear();

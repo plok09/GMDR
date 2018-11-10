@@ -14,13 +14,13 @@ public class GUIMDR
 	public static boolean standard=false;
 	public static boolean Binary=true;
 	
-	public static File name_bed=new File("");
-	public static File name_bim=new File("");	
-	public static File name_fam=new File("");
+	public static File name_bed=new File("NULL");
+	public static File name_bim=new File("NULL");	
+	public static File name_fam=new File("NULL");
 	public static Plink dataset=null;
-	public static File name_ped=new File("");
-	public static File name_map=new File("");
-	public static File name_phe=new File("");
+	public static File name_ped=new File("NULL");
+	public static File name_map=new File("NULL");
+	public static File name_phe=new File("NULL");
 	public static boolean is_creat_object=false;
 	public static String name_file[];
 	public static String project_path=".";

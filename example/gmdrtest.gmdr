@@ -1,3 +1,4 @@
-bed	D:\Repository\GMDR\example\example.bed
-fam	D:\Repository\GMDR\example\example.fam
-bim	D:\Repository\GMDR\example\example.bim
+bed>>D:\Java Respo\GMDR\example\example.bed
+fam>>D:\Java Respo\GMDR\example\example.fam
+bim>>NULL
+phe>>D:\Java Respo\GMDR\example\example.phe

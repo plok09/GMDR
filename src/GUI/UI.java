@@ -14,15 +14,15 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.time.format.FormatStyle;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AbstractDocument.BranchElement;
 import javax.swing.text.BadLocationException;
@@ -32,10 +32,10 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import org.molgenis.genotype.annotation.CaseControlAnnotation;
 
 import DataManage.Plink;
 
@@ -105,18 +105,42 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			"About"
 	};
 	public JMenuItem HelpMenuItem[]=new JMenuItem[HelpMenuItemTitle.length];
-	public OpenProject myOpenProject;
+	
 //	public String name[];
 	
 	JSplitPane sppmain = new JSplitPane();
 	JScrollPane scpdirtree = new JScrollPane();
 	JScrollPane scpHistoryCommand = new JScrollPane();
-	FileTree fileTree=new FileTree();
+	protected FileTree fileTree=new FileTree();
 	private JTextPane txtpnHistoryCommand = new JTextPane();
 	public StyledDocument doc = txtpnHistoryCommand.getStyledDocument();
 	public SimpleAttributeSet keyWordfailed = new SimpleAttributeSet();
 	public SimpleAttributeSet keyWordsuccessed = new SimpleAttributeSet();
 	public SimpleAttributeSet keyWordwarning = new SimpleAttributeSet();
+	public FileTree getFileTree() 
+	{
+		return fileTree;
+	}
+	public Point getMenuLocation(int i) 
+	{
+		return menu[i].getLocationOnScreen();
+	}
+	public  Dimension getMenusize(int i) 
+	{
+		return menu[i].getSize();
+	}
+	public Point FocusMenuLocation(int i) 
+	{
+		int y=(int) (getMenuLocation(i).y+getMenusize(i).getHeight()/2);
+		int x=(int) (getMenuLocation(i).x+getMenusize(i).getWidth()/2);
+		Point point=new Point(x, y);
+		return point;
+	}
+	public int FileMenuItemLocation(int itemid) 
+	{
+		int height=(int) FileMenuItem[itemid].getSize().getHeight();
+		return height*(itemid+1);
+	}
 	public UI()
 	{
 		getContentPane().setBackground(UIManager.getColor("Button.focus"));
@@ -129,6 +153,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		this.setVisible(true);
 		getContentPane().setLayout(new BorderLayout());
 		menuBar.setBackground(UIManager.getColor("Button.focus"));
+		
 		getContentPane().add(menuBar, BorderLayout.NORTH);
 		sppmain.setEnabled(false);
 		sppmain.setResizeWeight(0.2);
@@ -154,7 +179,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		
 		
 		fileTree.setBackground(SystemColor.window);
-		
+		fileTree.addTreeWillExpandListener(new TreeWillExpand_actionadapter(this));
 		scpdirtree.setViewportView(fileTree);
 		FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)));
 	    fileTree.setModel(model);
@@ -182,8 +207,6 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				} 
 				
 				
-				
-				
 			}
 		});
 		
@@ -199,7 +222,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 	            Map.Entry<String, String> entry =  it.next();  
 	            String key = entry.getKey();  
 	            String value = entry.getValue();  
-	            gmdrfile.write( key + "\t" + value+"\n");  
+	            gmdrfile.write( key + ">>" + value+"\n");  
 	        }  
 			gmdrfile.close();
 			} catch (IOException e) {
@@ -225,14 +248,191 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			String tmp=null;
 			while ((tmp=br.readLine())!=null) 
 			{
-				tmp=tmp.replaceAll(" ", "\t");
-				String[] tmpslpit=tmp.split("\t");
+				String[] tmpslpit=tmp.split(">>");
 				GUIMDR.gmdrini.put(tmpslpit[0],tmpslpit[1]);
 			}
 	
 	}
 	
-	
+	private void OpenGMDRProject(OpenProject myProject) 
+	{
+		try {
+				doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading project file "+GUIMDR.project_path+"\tSuccessed.\n",keyWordsuccessed);
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)),myProject.getProjectpath());
+            fileTree.setModel(model);
+            fileTree.setCellRenderer(new FileTreeRenderer());
+			try {
+				getList(GUIMDR.gmdrini_path);
+			} catch (IOException e3) 
+			{
+				e3.printStackTrace();
+			}
+			Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();    
+			int flag=0;
+	        while (it.hasNext()) 
+	        {  
+	            Map.Entry<String, String> entry =  it.next();  
+	            String key = entry.getKey();  
+	            String value = entry.getValue();  
+	            File inputfile=new File(value);
+	            if (!inputfile.exists()) 
+	            {
+	            	it.remove();
+	            	if (key.equals("bim")|key.equals("map")) 
+	            	{
+	            		try {
+							doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tWarning :Loading "+key+" file "+value+"\tFailed.\n",keyWordwarning);
+							doc.insertString(doc.getLength(),"\t\t"+key +" is not found\n",keyWordwarning);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}else
+					{
+						JOptionPane.showMessageDialog(new JFrame(), "Error :" +value+" is not found","Error",JOptionPane.ERROR_MESSAGE);
+						try {
+							doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tError :Loading "+key+" file "+value+"\tFailed.\n",keyWordfailed);
+							doc.insertString(doc.getLength(),"\t\t"+value +" is not found\n",keyWordfailed);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						continue;
+					}
+					
+				}
+	          
+	            switch (key) 
+	            {
+				case "bed":
+					GUIMDR.name_bed=new File(value);
+					this.ToolsMenuItem[0].setEnabled(true);
+					this.DataMenuItem[1].setEnabled(true);
+					try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.name_bed+"\tSuccessed.\n",keyWordsuccessed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					flag-=1;
+					break;
+				case "bim":
+					GUIMDR.name_bim=new File(value);
+					if (GUIMDR.name_bim.exists()) 
+		            {
+						try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.name_bim+"\tSuccessed.\n",keyWordsuccessed);
+						} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						}
+					this.ToolsMenuItem[0].setEnabled(true);
+					this.DataMenuItem[1].setEnabled(true);
+					
+					}
+					flag-=1;
+					break;
+				case "fam":
+					GUIMDR.name_fam=new File(value);
+					try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.name_fam+"\tSuccessed.\n",keyWordsuccessed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					this.ToolsMenuItem[0].setEnabled(true);
+					this.DataMenuItem[1].setEnabled(true);
+					flag-=1;
+					break;
+				case "ped":
+					GUIMDR.name_ped=new File(value);
+					try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+GUIMDR.name_ped+"\tSuccessed.\n",keyWordsuccessed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					this.ToolsMenuItem[0].setEnabled(true);
+					flag+=1;
+					break;
+					
+				case "map":
+					GUIMDR.name_map=new File(value);
+					if (GUIMDR.name_map.exists()) 
+			        {
+						try 
+						{
+							doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+GUIMDR.name_map+"\tSuccessed.\n",keyWordsuccessed);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+		            }
+					this.ToolsMenuItem[0].setEnabled(true);
+					this.DataMenuItem[1].setEnabled(true);
+					
+					flag+=1;
+					break;	
+					
+				case "phe":
+					GUIMDR.name_phe=new File(value);
+					try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading phenofile file "+value+"\tSuccessed.\n",keyWordsuccessed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					this.DataMenuItem[1].setEnabled(true);
+					Analysis.phenofile=GUIMDR.name_phe;
+					Analysis.txtphenopath.setText(value);
+					Analysis.refresh();
+					break;
+				}
+	        } 
+	        if (flag==-3) 
+	        {
+	        	String[] files=new String[3];
+				files[0]=GUIMDR.name_bed.getAbsolutePath();
+				files[1]=GUIMDR.name_bim.getAbsolutePath();
+				files[2]=GUIMDR.name_fam.getAbsolutePath();
+				try {
+					GUIMDR.dataset=new Plink(files);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+	        else if (flag==2) 
+	        	{
+		        	String[] files=new String[2];
+					files[0]=GUIMDR.name_ped.getAbsolutePath();
+					files[1]=GUIMDR.name_map.getAbsolutePath();
+					try {
+						GUIMDR.dataset=new Plink(files);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+	        	}else 
+	        	{
+	        		try {
+						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading Genotyoe date failed.\n",keyWordfailed);
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+	        
+			this.DataMenuItem[1].updateUI();
+			this.ToolsMenuItem[0].updateUI();
+			this.FileMenuItem[2].setEnabled(true);
+		    this.FileMenuItem[3].setEnabled(true);
+		
+	}
 	public void actionPerformed(ActionEvent e) 
 	{	
 		JMenuItem temp=(JMenuItem)e.getSource();
@@ -247,6 +447,11 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		          fileTree.setModel(model);
 		          fileTree.setCellRenderer(new FileTreeRenderer());
 				  GUIMDR.open=0;
+				  this.ToolsMenuItem[0].setEnabled(false);
+				  this.DataMenuItem[1].setEnabled(false);
+				  this.FileMenuItem[2].setEnabled(false);
+				  this.FileMenuItem[3].setEnabled(false);
+				  repaint(); 
 				try {
 					doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tCreating project in "+GUIMDR.project_path+"\tSuccessed.\n",keyWordsuccessed);
 				} catch (BadLocationException e1) {
@@ -259,158 +464,37 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			break;
 		case "Open":
 		    {
-				myOpenProject=new OpenProject();
+		    	OpenProject myOpenProject=new OpenProject();
 				if (myOpenProject.returnVal==JFileChooser.APPROVE_OPTION) 
 				{
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading project file "+GUIMDR.project_path+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)),myOpenProject.getProjectpath());
-		            fileTree.setModel(model);
-		            fileTree.setCellRenderer(new FileTreeRenderer());
-					try {
-						getList(GUIMDR.gmdrini_path);
-					} catch (IOException e3) 
-					{
-						e3.printStackTrace();
-					}
-					Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();    
-					int flag=0;
-			        while (it.hasNext()) {  
-			            Map.Entry<String, String> entry =  it.next();  
-			            String key = entry.getKey();  
-			            String value = entry.getValue();  
-			            File inputfile=new File(value);
-			            if (!inputfile.exists()) {
-			            it.remove();
-							JOptionPane.showMessageDialog(new JFrame(), "Error :" +value+" is not found","Error",JOptionPane.ERROR_MESSAGE);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tError :Loading "+key+" file "+value+"\tFailed.\n",keyWordfailed);
-								doc.insertString(doc.getLength(),"\t\t"+value +" is not found\n",keyWordfailed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							continue;
-						}
-			          
-			            switch (key) {
-						case "bed":
-							GUIMDR.name_bed=new File(value);
-							this.ToolsMenuItem[0].setEnabled(true);
-							this.DataMenuItem[1].setEnabled(true);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.name_bed+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							flag-=1;
-							break;
-						case "bim":
-							GUIMDR.name_bim=new File(value);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.name_bim+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							this.ToolsMenuItem[0].setEnabled(true);
-							this.DataMenuItem[1].setEnabled(true);
-							flag-=1;
-							break;
-						case "fam":
-							GUIMDR.name_fam=new File(value);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.name_fam+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							this.ToolsMenuItem[0].setEnabled(true);
-							this.DataMenuItem[1].setEnabled(true);
-							flag-=1;
-							break;
-						case "ped":
-							GUIMDR.name_ped=new File(value);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+GUIMDR.name_ped+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							this.ToolsMenuItem[0].setEnabled(true);
-							flag+=1;
-							break;
-							
-						case "map":
-							GUIMDR.name_map=new File(value);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+GUIMDR.name_map+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							this.ToolsMenuItem[0].setEnabled(true);
-							this.DataMenuItem[1].setEnabled(true);
-							flag+=1;
-							break;	
-							
-						case "phe":
-							GUIMDR.name_phe=new File(value);
-							try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading phenofile file "+value+"\tSuccessed.\n",keyWordsuccessed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							this.DataMenuItem[1].setEnabled(true);
-							Analysis.phenofile=GUIMDR.name_phe;
-							Analysis.txtphenopath.setText(value);
-							Analysis.refresh();
-							break;
-						}
-			        } 
-			        if (flag==-3) 
-			        {
-			        	String[] files=new String[3];
-						files[0]=GUIMDR.name_bed.getAbsolutePath();
-						files[1]=GUIMDR.name_bim.getAbsolutePath();
-						files[2]=GUIMDR.name_fam.getAbsolutePath();
-						GUIMDR.dataset=new Plink(files);
-					}
-			        else if (flag==2) 
-			        	{
-				        	String[] files=new String[2];
-							files[0]=GUIMDR.name_ped.getAbsolutePath();
-							files[1]=GUIMDR.name_map.getAbsolutePath();
-							GUIMDR.dataset=new Plink(files);
-			        	}else 
-			        	{
-			        		try {
-								doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading Genotyoe date failed.\n",keyWordfailed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-						}
-			        
-					this.DataMenuItem[1].updateUI();
-					this.ToolsMenuItem[0].updateUI();
-					
+					OpenGMDRProject(myOpenProject);
 				}
-				
 		    }
 			break;
 		case "Exit" :
-			System.exit(0);
+			{
+				if (GUIMDR.gmdrini.size()!=0) 
+				{
+			
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Would You Like to Save your Previous results First?","Warning",JOptionPane.YES_NO_OPTION);
+					if(dialogResult == JOptionPane.YES_OPTION)
+					{
+					  // Saving code here
+						if (GUIMDR.gmdrini_path.equals("")) 
+						{
+							NewProject myNewProject=new NewProject();
+						}
+						Saveingproject(GUIMDR.gmdrini_path);
+					}
+				} 
+				System.exit(0);
+			}
 			break;
 		case "Load Data":
 			
             LoadData myLoadData=new LoadData();
+			this.FileMenuItem[2].setEnabled(true);
+			this.FileMenuItem[3].setEnabled(true);
 			break;
 		case "Output Data":
 			OutputData myOutputData=new OutputData();
@@ -458,7 +542,12 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 					genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
 					genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
 				}
-				GUIMDR.dataset=new Plink(genofiles);
+				try {
+					GUIMDR.dataset=new Plink(genofiles);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			SummaryStatisticsFrame statisticsFrame=new SummaryStatisticsFrame();
 			break;
@@ -498,7 +587,15 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			AboutFrame aboutFrame=new AboutFrame();
 			break;
 		case "Help":
-			if (Desktop.isDesktopSupported())
+			try {
+				
+				HelpAuto helpAuto=new HelpAuto(this);
+				
+			} catch (AWTException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+/*			if (Desktop.isDesktopSupported())
 			{
 				File myFile = new File("manual.pdf");
 				if (myFile.isFile()) 
@@ -515,6 +612,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				    
 				}
 			}
+			*/
 			break;
 		default:
 			break;
@@ -619,7 +717,8 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				return;
 			}
 			
-			if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(GUIMDR.name_bed.getAbsolutePath())) {
+			if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(GUIMDR.name_bed.getAbsolutePath())) 
+			{
 				try {
 					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bed file "+GUIMDR.gmdrini.get("bed")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
 				} catch (BadLocationException e1) {
@@ -911,101 +1010,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				return;
 			}
 			OpenProject openProject=new OpenProject(selectedNode);
-			FileTreeModel model=new FileTreeModel(new DefaultMutableTreeNode(new FileNode("root",null,null,true)),openProject.getProjectpath());
-            fileTree.setModel(model);
-            fileTree.setCellRenderer(new FileTreeRenderer());
-            fileTree.updateUI();
-            try {
-				doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading project file "+GUIMDR.project_path+"\tSuccessed.\n",keyWordsuccessed);
-			} catch (BadLocationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			try {
-				getList(GUIMDR.gmdrini_path);
-			} catch (IOException e3) 
-			{
-				e3.printStackTrace();
-			}
-			Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();  
-	        while (it.hasNext()) {  
-	            Map.Entry<String, String> entry =  it.next();  
-	            String key = entry.getKey();  
-	            String value = entry.getValue();  
-	            
-	            switch (key) {
-				case "bed":
-					GUIMDR.name_bed=new File(value);
-					this.ToolsMenuItem[0].setEnabled(true);
-					this.DataMenuItem[1].setEnabled(true);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.name_bed+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					break;
-				case "bim":
-					GUIMDR.name_bim=new File(value);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.name_bim+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					this.ToolsMenuItem[0].setEnabled(true);
-					this.DataMenuItem[1].setEnabled(true);
-					break;
-				case "fam":
-					GUIMDR.name_fam=new File(value);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.name_fam+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					this.ToolsMenuItem[0].setEnabled(true);
-					this.DataMenuItem[1].setEnabled(true);
-					break;
-				case "ped":
-					GUIMDR.name_ped=new File(value);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+GUIMDR.name_ped+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					this.ToolsMenuItem[0].setEnabled(true);
-					break;
-				case "map":
-					GUIMDR.name_map=new File(value);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+GUIMDR.name_map+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					this.ToolsMenuItem[0].setEnabled(true);
-					this.DataMenuItem[1].setEnabled(true);
-					break;	
-					
-				case "phe":
-					Analysis.phenofile=new File(value);
-					Analysis.txtphenopath.setText(value);
-					try {
-						doc.insertString(doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoading phenofile file "+Analysis.phenofile+"\tSuccessed.\n",keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					this.DataMenuItem[1].setEnabled(true);
-					Analysis.refresh();
-					break;
-				}
-	        }  
-			
-			this.DataMenuItem[1].updateUI();
-			this.ToolsMenuItem[0].updateUI();
+			OpenGMDRProject(openProject);
 		}
 		
 		txtpnHistoryCommand.updateUI();
@@ -1025,9 +1030,63 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		}
 		
 	}
+	
+	class TreeWillExpand_actionadapter implements TreeWillExpandListener
+	{
+		UI adaptee;
+		public TreeWillExpand_actionadapter(UI adaptee) 
+		{
+			// TODO Auto-generated constructor stub
+			this.adaptee=adaptee;
+		}
+		@Override
+		public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException
+		{
+			// TODO Auto-generated method stub
+			adaptee.getContentPane().setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			DefaultMutableTreeNode lastTreeNode=(DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+			FileNode fileNode = (FileNode) lastTreeNode.getUserObject();
+			File[] files = null;
+			if (!fileNode.isInit) 
+			{
+						
+		 	    if (fileNode.isDummyRoot)
+		 	             {
+		 	                 files = adaptee.getFileTree().getFileSystemView().getRoots();
+		 	             } else 
+		 	             {
+		 	                 files = adaptee.getFileTree().getFileSystemView().getFiles(
+		 	                         ((FileNode) lastTreeNode.getUserObject()).file,
+		 	                         false);
+		 	             }
+			}
+					
+			for (int i = 0; i < files.length; i++)
+			{
+                        FileNode childFileNode = new FileNode(
+                        		adaptee.getFileTree().getFileSystemView().getSystemDisplayName(files[i]),
+                        		adaptee.getFileTree().getFileSystemView().getSystemIcon(files[i]), files[i],
+                                false);
+                        DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(childFileNode);
+                        lastTreeNode.add(childTreeNode);
+             }
+			fileNode.isInit=true;
+			adaptee.getContentPane().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			
+		}
+		
+	}
+	
 	class mouseinfiletree_actionadapter implements MouseListener
 	{
 		UI adaptee;
+		
 		public mouseinfiletree_actionadapter(UI adaptee) {
 			// TODO Auto-generated constructor stub
 			this.adaptee=adaptee;
@@ -1138,6 +1197,8 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			menu[5].add(HelpMenuItem[i]);
 		}
 		menu[3].addMouseListener(new mouseinbar_actionadapter(this));
+		FileMenuItem[2].setEnabled(false);
+		FileMenuItem[3].setEnabled(false);
 		DataMenuItem[1].setEnabled(false);
 	}
 	
@@ -1161,6 +1222,83 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 
 	public void menuCanceled(MenuEvent e) {
 		
+	}
+	
+	class NewProject{
+		
+		private JPanel file_name=new JPanel();
+		public String selected_directory="";
+		public JLabel file_names[];
+		private File chooseFile;
+		int resultval;
+		public NewProject()
+		{
+		
+			 JFileChooser choose=new JFileChooser();
+			 choose.setCurrentDirectory(new File( GUIMDR.project_path));
+			 FileNameExtensionFilter filter=new FileNameExtensionFilter("GMDR Projest File", "gmdr");
+			 choose.setFileFilter(filter);
+			 resultval =choose.showSaveDialog(new JPanel());
+			
+			 if (resultval==JFileChooser.APPROVE_OPTION) 
+			 {
+				 selected_directory=choose.getCurrentDirectory().toString();
+				 GUIMDR.project_path=new String(selected_directory);
+				 GUIMDR.gmdrini_path=choose.getSelectedFile().getAbsolutePath().toString()+".gmdr";
+				 GUIMDR.gmdrini=new HashMap<>();
+				 GUIMDR.standard=false;
+				 GUIMDR.Binary=true;
+					
+				 GUIMDR.name_bed=new File("NULL");
+				 GUIMDR.name_bim=new File("NULL");	
+				 GUIMDR.name_fam=new File("NULL");
+				 GUIMDR.dataset=null;
+				 GUIMDR.name_ped=new File("NULL");
+				 GUIMDR.name_map=new File("NULL");
+				 GUIMDR.name_phe=new File("NULL");
+				 GUIMDR.is_creat_object=false;
+				 GUIMDR.name_file=null;
+				 readFile();
+				 
+			}
+	  
+		}
+		public void readFile()
+		{
+			chooseFile=new File(selected_directory);
+			file_name.setLayout(new BoxLayout(file_name,BoxLayout.Y_AXIS));
+		
+			if(!chooseFile.isDirectory())
+				System.out.print("Wrong");
+			
+			File[] t=chooseFile.listFiles();
+			
+			GUIMDR.name_file=new String[t.length];
+			int length=t.length;
+			file_names=new JLabel[length];
+			for(int i=0;i<t.length;i++)
+			{
+				//if (chooseFile.listFiles()[i].getPath().endsWith(".ped")|chooseFile.listFiles()[i].getPath().endsWith(".map")|chooseFile.listFiles()[i].getPath().endsWith(".bed")|chooseFile.listFiles()[i].getPath().endsWith(".fam")|chooseFile.listFiles()[i].getPath().endsWith(".bim")) {
+					file_names[i]=new JLabel(chooseFile.listFiles()[i].getName(),JLabel.LEFT);
+					GUIMDR.name_file[i]=new String(chooseFile.listFiles()[i].getName());
+					file_name.add(file_names[i]);
+				//}
+				
+			}
+		}
+		public JPanel returnNames()
+		{
+			GUIMDR.myUI.menu[1].setEnabled(true);
+			return file_name;
+		}
+		
+		public String getProjectpath() 
+		{
+
+			File rootdir=new File(selected_directory);
+			return rootdir.getAbsolutePath();
+			
+		}
 	}
 
 }
