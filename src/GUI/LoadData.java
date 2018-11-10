@@ -94,7 +94,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 	public LoadData()
 	{
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setResizable(false);
+		setResizable(true);
 		setTitle("Input Data");
 		if(GUIMDR.name_file!=null)
 		{
@@ -122,7 +122,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		getContentPane().add(tabpanel);
 		getContentPane().add(pnlbtnokandcancel, BorderLayout.SOUTH);
-		Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();
+/*		Iterator<Entry<String, String>> it = GUIMDR.gmdrini.entrySet().iterator();
         while (it.hasNext()) 
         {  
         	
@@ -160,16 +160,17 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				
 			}
         }
-
+*/
 		initBinary();
 		initStandardInput();
 		initAleternatePhenotype();
 		initLast();
 		
-		this.setSize(649,422);
+		this.setPreferredSize(new Dimension(660,300));
 		this.setVisible(true);
 		this.setLocation(470,210);
-		GUIMDR.myUI.DataMenuItem[1].setEnabled(true);
+		this.pack();
+	//	GUIMDR.myUI.DataMenuItem[1].setEnabled(true);
 	}
 	
 	public void initBinary()
@@ -191,8 +192,6 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		pnlbinfilechoose.add(pnlbedfilechoose);
 		pnlbedfilechoose.setLayout(null);
 		labelbed.setBounds(10, 10, 70, 15);
-		labelbed.setVerticalAlignment(SwingConstants.TOP);
-		labelbed.setHorizontalAlignment(SwingConstants.LEFT);
 		pnlbedfilechoose.add(labelbed);
 		txabedfilepath.setBounds(74, 6, 461, 23);
 		pnlbedfilechoose.add(txabedfilepath);

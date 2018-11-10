@@ -587,15 +587,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 			AboutFrame aboutFrame=new AboutFrame();
 			break;
 		case "Help":
-			try {
-				
-				HelpAuto helpAuto=new HelpAuto(this);
-				
-			} catch (AWTException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-/*			if (Desktop.isDesktopSupported())
+			if (Desktop.isDesktopSupported())
 			{
 				File myFile = new File("manual.pdf");
 				if (myFile.isFile()) 
@@ -612,7 +604,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 				    
 				}
 			}
-			*/
+			
 			break;
 		default:
 			break;
