@@ -68,7 +68,7 @@ public class AboutFrame  extends JFrame
 	//	jEdit_Contact.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
 		
 		jEdit_Contact.setText("<br /><div align=\"center\"><font face=\"STLiti\",size=5>Generalized Multifactor Dimensionality Reduction V1.0</font></div align=\"center\">"
-								+ "<p style=\"line-height:50px;\"><div align=\"center\"><font face=\"STLiti\",size=5>Release Time : Oct 26th 2018, 17:35</font></div align=\"center\"><br />"
+								+ "<p style=\"line-height:50px;\"><div align=\"center\"><font face=\"STLiti\",size=5>Release Time : Nov 12th 2018, 17:35</font></div align=\"center\"><br />"
 								+ "&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font face=\"STLiti\",size=5>Author: <a href=\"http://ibi.zju.edu.cn/bcl/\">Biocomputing Lab Team</a></font><br />"
 								+ "&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font face=\"STLiti\",size=5>Contact: <a href=\"mailto:houtt@zju.edu.cn?\">houtt@zju.edu.cn£»</a></font><br />"
 								+ "&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;&ensp;<font face=\"STLiti\",size=5><a href=\"mailto:hmxu@zju.edu.cn?\">hmxu@zju.edu.cn;</a></font><br />"

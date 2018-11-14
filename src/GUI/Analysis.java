@@ -160,7 +160,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	
 	private JPanel pnlScorePhenopath=new JPanel();
 	private JLabel labelphenofile=new JLabel("Phenotype File");
-	public static JTextArea txtphenopath=new JTextArea(1,50);
+//	public static JTextArea txtphenopath=new JTextArea(1,70);
 	private JButton loadphenotype=new JButton("Load Phenotype");
 	private static JPanel pnlpheofile=new JPanel();
 	private static ColumnSelectableJTable table221;
@@ -190,7 +190,6 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	private JPanel pnlestimationfunc=new JPanel();
 	private JPanel panel_select=new JPanel();
 	private ButtonGroup btg241=new ButtonGroup();
-	private JLabel label241=new JLabel("Link Function");
 	private JRadioButton radiobutton241=new JRadioButton("Linear Regression");
 	private JLabel label242=new JLabel("Estimating Method");
 	private JRadioButton radiobutton242=new JRadioButton("Logistic Regression");
@@ -239,12 +238,24 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	private  JTextArea txaCVResults = new JTextArea();
 	private  JPanel panel = new JPanel();
 	private  JButton btnNewButton = new JButton("save");
-	private  JPanel panel_1 = new JPanel();
+//	private  JPanel panel_1 = new JPanel();
 	private JButton cmdBestModelView = new JButton("View");
 	private JButton cmdCVResultsView = new JButton("View");
 	private JButton cmdIfThenRulesView = new JButton("View");
 	private JButton cmdloadscore = new JButton("Load");
-	private final JTextArea txascorefile = new JTextArea();
+	private final JTextField txtscorefile = new JTextField();
+	public static JTextField txtphenopath = new JTextField();
+	private final JPanel pnlphepath = new JPanel();
+	private final Component horizontalGlue = Box.createHorizontalGlue();
+	private final Component horizontalStrut = Box.createHorizontalStrut(10);
+	private final JPanel panel_2 = new JPanel();
+	private final JLabel label = new JLabel("Link Function");
+	private final JPanel panel_3 = new JPanel();
+	private final JPanel panel_4 = new JPanel();
+	private final JPanel panel_5 = new JPanel();
+	private final JPanel panel_6 = new JPanel();
+	private final JSplitPane splitPane = new JSplitPane();
+	private final JPanel panel_1 = new JPanel();
 	private class OnEndAttribute implements Runnable {
 		public void run() {
 			int attrCount = jtsummary.getRowCount();
@@ -288,6 +299,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 
 	public Analysis()
 	{
+		setTitle("Analysis");
 		tabbed.add("MDR Analysis",jpanalysis);
 		tabbed.add("Residual Calculation",score_calculation);
 		tabbed.add("Study Design",pnlconfiguration);
@@ -354,7 +366,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		tie.addItem("Affected");
 		tie.addItem("Unaffected");
 		tie.addItem("Unknown");
-		jpanalysis.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		jpanalysis.setLayout(new BoxLayout(jpanalysis, BoxLayout.Y_AXIS));
 		pnlanalysisconfig.add(pnlline3);
 		pnlline3.setLayout(new FlowLayout(FlowLayout.LEFT));
 		pnlline3.add(label1131);
@@ -402,8 +414,19 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		pnlanalysiscontrol.setPreferredSize(new Dimension(785,60));
 		pnlanalysiscontrol.setBorder(BorderFactory.createTitledBorder("Analysis Controls"));
 		jpanalysis.add(pnlanalysiscontrol);
-		prgProgress.setPreferredSize(new Dimension(785,60));
+		prgProgress.setPreferredSize(new Dimension(785, 40));
 		jpanalysis.add(prgProgress);
+		prgProgress.setLayout(new GridLayout(1, 0, 0, 0));
+		
+		jpanalysis.add(panel_1);
+		panel_1.setLayout(new GridLayout(0, 1, 0, 0));
+		panel_1.add(splitPane);
+		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		
+		jpsummary.setLayout(new GridLayout(0, 1, 0, 0));
+		jpsummary.setBorder(BorderFactory.createTitledBorder("Summary Completed"));
+		jpsummary.setPreferredSize(new Dimension(785,120));
+//		jpanalysis.add(jpsummary);
 		jtsummary.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtsummary.setModel(dtmSummaryTable);
 		//	jtsummary=new ColumnSelectableJTable(data_table151,jtsummaryname);
@@ -413,29 +436,12 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		jtsummary.getTableHeader().setReorderingAllowed(false);
 		jtsummary.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtsummary.getSelectionModel().addListSelectionListener(new Frame_tblSummaryTable_selectionAdapter(this));
-			//	tblSummaryTable.getSelectionModel().addListSelectionListener(new Frame_tblSummaryTable_selectionAdapter(this));
-				///////////////////
+		//	tblSummaryTable.getSelectionModel().addListSelectionListener(new Frame_tblSummaryTable_selectionAdapter(this));
+			///////////////////
 		jpsummary.add(scrollpane_table151);
-		jpsummary.setLayout(new FlowLayout(FlowLayout.LEFT));
-		jpsummary.setBorder(BorderFactory.createTitledBorder("Summary Completed"));
-		jpsummary.setPreferredSize(new Dimension(785,120));
-		jpanalysis.add(jpsummary);
-		jpanalysis.add(panel_1);
+//		jpanalysis.add(panel_1);
 		pnlGraphicalModel.setEnabled(false);
 		tpnResults.addTab("Graphical Model", null, pnlGraphicalModel, null);
-		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWeights = new double[]{0.0};
-		gbl_panel.rowWeights = new double[]{0.0};
-		panel.setLayout(gbl_panel);
-		pnlLandscape.setXAxisLabel("Models");
-		pnlLandscape.setYAxisLabel("Accuracy");
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.weightx = 1.0;
-		gbc_btnNewButton.insets = new Insets(5, 5, 5, 5);
-		gbc_btnNewButton.anchor = GridBagConstraints.EAST;
-		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 0;
-		panel.add(btnNewButton, gbc_btnNewButton);
 		tpnResults.addTab("Best Model", null, pnlbestmodel, null);
 		pnlbestmodel.setLayout(new BorderLayout(0, 0));
 		pnlbestmodel.add(pnlBestModelButtons, BorderLayout.SOUTH);
@@ -453,6 +459,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		cmdCVResultsSave.addActionListener(new Frame_cmdCVResults_actionAdapter(this));
 		cmdIfThenRulesSave.addActionListener(new Frame_cmdIfThenRules_actionAdapter(this));
 		pnlBestModelButtons.add(cmdBestModelSave, gbc_cmdBestModelSave);
+		
+
 		
 		
 		GridBagConstraints gbc_cmdBestModelView = new GridBagConstraints();
@@ -521,32 +529,32 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		pnlCVResultsButtons.add(cmdCVResultsView, gbc_cmdCVResultsView);
 		scpCVResults.setViewportBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		cmdCVResultsView.addActionListener(new Frame_cmdCVResultsView_actionAdapter(this));
-		pnlCVResults.add(scpCVResults, BorderLayout.CENTER);
-		txaCVResults.setEditable(false);
-		cmdBestModelView.setEnabled(false);
-		cmdCVResultsView.setEnabled(false);
-		cmdIfThenRulesView.setEnabled(false);
-		cmdBestModelSave.setEnabled(false);
-		cmdCVResultsSave.setEnabled(false);
-		cmdIfThenRulesSave.setEnabled(false);
-		scpCVResults.setViewportView(txaCVResults);
-		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(tpnResults, GroupLayout.PREFERRED_SIZE, 775, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-		);
-		gl_panel_1.setVerticalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
-					.addGap(5)
-					.addComponent(tpnResults, GroupLayout.PREFERRED_SIZE, 155, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-		);
-		panel_1.setLayout(gl_panel_1);
-
+		//		panel_1.setLayout(new CardLayout(0, 0));
+				pnlCVResults.add(scpCVResults, BorderLayout.CENTER);
+				txaCVResults.setEditable(false);
+				cmdBestModelView.setEnabled(false);
+				cmdCVResultsView.setEnabled(false);
+				cmdIfThenRulesView.setEnabled(false);
+				cmdBestModelSave.setEnabled(false);
+				cmdCVResultsSave.setEnabled(false);
+				cmdIfThenRulesSave.setEnabled(false);
+				scpCVResults.setViewportView(txaCVResults);
+				//		panel_1.add(tpnResults, "name_145795231104532");
+						splitPane.setLeftComponent(jpsummary);
+						splitPane.setRightComponent(tpnResults);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWeights = new double[]{0.0};
+		gbl_panel.rowWeights = new double[]{0.0};
+		panel.setLayout(gbl_panel);
+		pnlLandscape.setXAxisLabel("Models");
+		pnlLandscape.setYAxisLabel("Accuracy");
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.weightx = 1.0;
+		gbc_btnNewButton.insets = new Insets(5, 5, 5, 5);
+		gbc_btnNewButton.anchor = GridBagConstraints.EAST;
+		gbc_btnNewButton.gridx = 0;
+		gbc_btnNewButton.gridy = 0;
+		panel.add(btnNewButton, gbc_btnNewButton);
 		
 	}
 	class Frame_cmdLoadPhenotype_actionAdapter implements ActionListener {
@@ -557,40 +565,62 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			adaptee.cmdLoadphenotype_actionPerformed(e);
+			JFileChooser chooser=new JFileChooser(GUIMDR.project_path);
+			FileNameExtensionFilter filter=new FileNameExtensionFilter("PHE","phe");
+			chooser.setFileFilter(filter);
+			chooser.setAcceptAllFileFilterUsed(true);
+			int returnVal =chooser.showOpenDialog(new JPanel());
+			if (returnVal!=JFileChooser.APPROVE_OPTION) {
+				return;
+			}
+			txtphenopath.setText(chooser.getSelectedFile().getAbsolutePath());
+			adaptee.cmdLoadphenotype_actionPerformed(txtphenopath.getText());
+			adaptee.repaint();
 		}
 	}
-	public void cmdLoadphenotype_actionPerformed(ActionEvent e) 
+	public void cmdLoadphenotype_actionPerformed(String fileaddress) 
 	{
-		JFileChooser chooser=new JFileChooser(GUIMDR.project_path);
-		FileNameExtensionFilter filter=new FileNameExtensionFilter("phe file","phe");
-		chooser.setFileFilter(filter);
-		int returnVal =chooser.showOpenDialog(new JPanel());
-		if (returnVal!=JFileChooser.APPROVE_OPTION) {
-			return;
-		}
-		phenofile=new File(chooser.getSelectedFile().getAbsolutePath());
-		txtphenopath.setText(chooser.getSelectedFile().getAbsolutePath());
-		if (!GUIMDR.gmdrini_path.equals("")) 
+		
+		phenofile=new File(fileaddress);
+		if (!phenofile.exists()) 
 		{
-			if (GUIMDR.gmdrini.containsKey("phe")) {
-				try {
-					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old phenotype "+GUIMDR.gmdrini.get("phe")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
-				} catch (BadLocationException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-			GUIMDR.gmdrini.put("phe", phenofile.getAbsolutePath());
+			JOptionPane.showMessageDialog(null,phenofile.getAbsolutePath()+" is not existed. Please Check the address");
+			
 			try {
-				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new phenotype "+phenofile.getAbsolutePath()+" successed\n", GUIMDR.myUI.keyWordsuccessed);
+				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new phenotype "+phenofile.getAbsolutePath()+" Failed\n", GUIMDR.myUI.keyWordfailed);
 			} catch (BadLocationException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
+			return;
 		}
-		
+		if (!phenofile.isFile()) 
+		{
+			JOptionPane.showMessageDialog(null,phenofile.getAbsolutePath()+" is not a file. Please Check the address");
+			
+			try {
+				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new phenotype "+phenofile.getAbsolutePath()+" Failed\n", GUIMDR.myUI.keyWordfailed);
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return;
+		}
+		if (GUIMDR.gmdrini.containsKey("phe")) {
+			try {
+				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old phenotype "+GUIMDR.gmdrini.get("phe")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		GUIMDR.gmdrini.put("phe", phenofile.getAbsolutePath());
+		try {
+			GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new phenotype "+phenofile.getAbsolutePath()+" successed\n", GUIMDR.myUI.keyWordsuccessed);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}	
 		
 		initData221();
 		
@@ -603,8 +633,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	    pnlpheofile.removeAll();
 		pnlpheofile.add(scrollpane_table221);
 		pnlselectedresidual.removeAll();
-		txascorefile.setText("");
-		txascorefile.setBackground(UIManager.getColor("Button.background"));
+		txtscorefile.setText("");
+		txtscorefile.setBackground(UIManager.getColor("Button.background"));
 		removeresponse.setEnabled(true);
 		addresponse.setEnabled(true);
 		removepredictor.setEnabled(true);
@@ -650,6 +680,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 
 		public void actionPerformed(ActionEvent e) {
 			adaptee.cmdLoadAnalysis_actionPerformed(e);
+			adaptee.repaint();
 		}
 	}
  
@@ -672,24 +703,26 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		Dataset dataset=new Dataset();
 		dataset.IsloadScore(false);
 		dataset.setPaired(ispaired.isSelected());
+		String[] genofiles;
+		if(GUIMDR.name_bed.getName()=="")
+		{
+			genofiles=new String[2];
+			genofiles[0]=new String(GUIMDR.name_ped.getAbsolutePath());
+			genofiles[1]=new String(GUIMDR.name_map.getAbsolutePath());
+		}
+		else
+		{
+			genofiles=new String[3];
+			genofiles[0]=new String(GUIMDR.name_bed.getAbsolutePath());
+			genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
+			genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
+		}
 		if (GUIMDR.dataset==null)
 		{
-			String[] genofiles;
-			if(GUIMDR.name_bed.getName()=="")
-			{
-				genofiles=new String[2];
-				genofiles[0]=new String(GUIMDR.name_ped.getAbsolutePath());
-				genofiles[1]=new String(GUIMDR.name_map.getAbsolutePath());
-			}
-			else
-			{
-				genofiles=new String[3];
-				genofiles[0]=new String(GUIMDR.name_bed.getAbsolutePath());
-				genofiles[1]=new String(GUIMDR.name_bim.getAbsolutePath());
-				genofiles[2]=new String(GUIMDR.name_fam.getAbsolutePath());
-			}
-			GUIMDR.dataset=new Plink(genofiles);
+			
+			GUIMDR.dataset=new Plink(genofiles);			
 		}
+		datafiles=genofiles;
 		dataset.read(GUIMDR.dataset);
 		
 		pnlGraphicalModel.setData(dataset);
@@ -707,7 +740,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			dataset.IsloadScore(false);
 		}
 		data=dataset;
-///		datafiles=genofiles;
+		
         int min=Integer.valueOf(mincount.getText());
         int max=Integer.valueOf(maxcount.getText());
         if (min>max) 
@@ -864,7 +897,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	public void cmdSaveAnalysis_actionPerformed(ActionEvent e) {
 		
 //		PrintWriter out = FileSaver.openFileWriter(this, "Save Analysis");
-		FileNameExtensionFilter filter=new FileNameExtensionFilter("result File", "result");
+		FileNameExtensionFilter filter=new FileNameExtensionFilter("Result", "result");
 	    JFileChooser choose;
 	    if (!GUIMDR.project_path.equals("")) {
 	    	
@@ -874,6 +907,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			 choose=new JFileChooser();
 		}
 		choose.setFileFilter(filter);
+		choose.setAcceptAllFileFilterUsed(true);
 		choose.showSaveDialog(new JPanel());
         String result_path=choose.getSelectedFile().getAbsolutePath()+".result";
 		File resultfile=new File(result_path);
@@ -974,13 +1008,24 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		
 		score_data=null;
 		unfiltered=null;
-		JFileChooser fc = new JFileChooser(GUIMDR.project_path);
-		fc.setMultiSelectionEnabled(false);
-		fc.setDialogTitle("Load Analysis");
-		BufferedReader in=null;
-		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+		JFileChooser choose ;
+		FileNameExtensionFilter filter=new FileNameExtensionFilter("Result", "result");
+//	    JFileChooser choose;
+	    if (!GUIMDR.project_path.equals("")) {
+	    	
+	    	 choose=new JFileChooser(GUIMDR.project_path);
+		}
+		else {
+			 choose=new JFileChooser();
+		}
+		choose.setFileFilter(filter);
+		choose.setAcceptAllFileFilterUsed(true);
+		choose.setFileFilter(filter);
+		choose.setMultiSelectionEnabled(false);
+		choose.setDialogTitle("Load Analysis");
+		if (choose.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			try {
-				in = new BufferedReader(new FileReader(fc.getSelectedFile()));
+				BufferedReader in = new BufferedReader(new FileReader(choose.getSelectedFile()));
 				AnalysisFileManager afm = new AnalysisFileManager();
 				afm.read(in);
 
@@ -1063,69 +1108,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 						}
 					}
 				}
-/*
-				if (unfiltered != null) {
-					String filtername = (String) afm.getFilterConfig().get("FILTER");
-
-					if (filtername.equalsIgnoreCase("RELIEFF")) {
-						cboFilter.setSelectedIndex(0);
-						pnlFilterLandscape.setYAxisLabel("ReliefF");
-						String samples = (String) afm.getFilterConfig().get("SAMPLES");
-						if (samples.equalsIgnoreCase("ALL")) {
-							chkReliefFWholeDataset.setSelected(true);
-						} else {
-							chkReliefFWholeDataset.setSelected(false);
-							spnReliefFSampleSize.setValue(Integer.valueOf(samples));
-						}
-
-						if (afm.getFilterConfig().containsKey("NEIGHBORS")) {
-							spnReliefFNeighbors.setValue(Integer.valueOf((String) afm.getFilterConfig().get("NEIGHBORS")));
-						}
-					} else if (filtername.equalsIgnoreCase("CHISQUARED")) {
-						cboFilter.setSelectedIndex(1);
-						pnlFilterLandscape.setYAxisLabel("\u03a7\u00b2");
-
-						if (afm.getFilterConfig().containsKey("PVALUE")) {
-							chkChiSquaredPValue.setSelected(Boolean.valueOf((String) afm.getFilterConfig().get("PVALUE")).booleanValue());
-						}
-					} else if (filtername.equalsIgnoreCase("ODDSRATIO")) {
-						cboFilter.setSelectedIndex(1);
-						pnlFilterLandscape.setYAxisLabel("OddsRatio");
-					}
-
-					String selection = (String) afm.getFilterConfig().get("SELECTION");
-					String selectionvalue = (String) afm.getFilterConfig().get("SELECTIONVALUE");
-
-					if (selection != null) {
-						if (selection.equalsIgnoreCase("TOPN")) {
-							cboCriterion.setSelectedIndex(0);
-
-							if (selectionvalue != null) {
-								spnCriterionFilter.setValue(Integer.valueOf(selectionvalue));
-							}
-						} else if (selection.equalsIgnoreCase("TOP%")) {
-							cboCriterion.setSelectedIndex(1);
-
-							if (selectionvalue != null) {
-								spnCriterionFilter.setValue(Double.valueOf(selectionvalue));
-							}
-						}
-
-						else if (selection.equalsIgnoreCase("THRESHOLD")) {
-							cboCriterion.setSelectedIndex(2);
-
-							if (selectionvalue != null) {
-								spnCriterionFilter.setValue(Double.valueOf(selectionvalue));
-							}
-						}
-					}
-
-					pnlFilterLandscape.setLandscape(afm.getFilterScores());
-					pnlFilterLandscape.setEnabled(true);
-				}
-				*/
-				// data2
-				
+		
 				String line = in.readLine();
 				if (line != null && line.contains("Scorefile = ")) {
 					Isusescore.setSelected(true);
@@ -1162,8 +1145,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 					    pnlpheofile.removeAll();
 						pnlpheofile.add(scrollpane_table221);
 						pnlselectedresidual.removeAll();
-						txascorefile.setText("");
-						txascorefile.setBackground(UIManager.getColor("Button.background"));
+						txtscorefile.setText("");
+						txtscorefile.setBackground(UIManager.getColor("Button.background"));
 						removeresponse.setEnabled(true);
 						addresponse.setEnabled(true);
 						removepredictor.setEnabled(true);
@@ -1240,34 +1223,37 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 					pnlselectedresidual.removeAll();
 					pnlselectedresidual.add(scrollpane_temp_table);
 					pnlselectedresidual.updateUI();
-				
+					try {
+						in.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 				
-			//	cmdViewScorefile.setEnabled(data2 != null);
-		//		cmdLoadScorefile.setEnabled(true);
-		//		lockdown(false);
+
 				prgProgress.setValue(1);
 				runanalysis.setEnabled(true);
 				saveanalysis.setEnabled(true);
 //				cmdExportFiltered.setEnabled(true);
 				try {
-					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoad analysis results from  "+fc.getSelectedFile().getAbsolutePath()+"  successed.\n",GUIMDR.myUI.keyWordsuccessed);
+					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tLoad analysis results from  "+choose.getSelectedFile().getAbsolutePath()+"  successed.\n",GUIMDR.myUI.keyWordsuccessed);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			} catch (FileNotFoundException ex) {
-				JOptionPane.showMessageDialog(this, "File '" + fc.getSelectedFile() + "'not found.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "File '" + choose.getSelectedFile() + "'not found.", "Error", JOptionPane.ERROR_MESSAGE);
 				try {
-					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tFile '" + fc.getSelectedFile() + "'not found.\n", GUIMDR.myUI.keyWordfailed);
+					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tFile '" + choose.getSelectedFile() + "'not found.\n", GUIMDR.myUI.keyWordfailed);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this, "Unable to read File '" + fc.getSelectedFile() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Unable to read File '" + choose.getSelectedFile() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
 				try {
-					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tUnable to read File '" + fc.getSelectedFile() + "'.\n", GUIMDR.myUI.keyWordfailed);
+					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),Main.dateFormat.format(Main.date.getTime())+"\tUnable to read File '" + choose.getSelectedFile() + "'.\n", GUIMDR.myUI.keyWordfailed);
 				} catch (BadLocationException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1282,14 +1268,9 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				}
 				
 			}
-			
+		
 		}
-		try {
-			in.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		
 	}
 
 	class Frame_tblSummaryTable_selectionAdapter implements ListSelectionListener {
@@ -1372,7 +1353,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	}
 	public void cmdScoreSave_actionPerformed(ActionEvent e) 
 	{
-	    FileNameExtensionFilter filter=new FileNameExtensionFilter("Residual File", "residual");
+	    FileNameExtensionFilter filter=new FileNameExtensionFilter("Residual", "residual");
 	    JFileChooser choose;
 	    if (!GUIMDR.project_path.equals("")) {
 	    	
@@ -1383,7 +1364,10 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		}
 		choose.setFileFilter(filter);
 		choose.setAcceptAllFileFilterUsed(true);
-		choose.showSaveDialog(new JPanel());
+		if (choose.showSaveDialog(new JPanel())!=JFileChooser.APPROVE_OPTION) 
+		{
+			return;
+		}
         String residual_path=choose.getSelectedFile().getPath()+".residual";
 		File temp_file=new File(residual_path);
 		FileWriter fw;;
@@ -1440,9 +1424,9 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 				e1.printStackTrace();
 			}
 		}
-		txascorefile.setText(residual_path);
-		txascorefile.enable(false);
-		txascorefile.updateUI();
+		txtscorefile.setText(residual_path);
+		txtscorefile.enable(false);
+		txtscorefile.updateUI();
 		return;	
 	}
 	class Frame_cmdLoadScore_actionAdapter implements ActionListener
@@ -1456,22 +1440,50 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			adaptee.cmdLoadScore_actionPerformed(e);
+			 FileNameExtensionFilter filter=new FileNameExtensionFilter("Residual", "residual");
+			 JFileChooser choose = new JFileChooser(GUIMDR.project_path);
+			 choose.setFileFilter(filter);
+			 choose.setAcceptAllFileFilterUsed(true);
+			 int returnVal =choose.showOpenDialog(new JPanel());
+			 if (returnVal!=JFileChooser.APPROVE_OPTION) 
+			 {
+				return;
+			 }
+			
+			 File readscore=choose.getSelectedFile();
+			adaptee.cmdLoadScore_actionPerformed(readscore.getPath());
+			adaptee.repaint();
 		}
 		
 	}
-	public void cmdLoadScore_actionPerformed(ActionEvent e) 
+	public void cmdLoadScore_actionPerformed(String fileaddress) 
 	{
-		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Residual File", "residual");
-		 JFileChooser choose = new JFileChooser(GUIMDR.project_path);
-		 choose.setFileFilter(filter);
-		 int returnVal =choose.showOpenDialog(new JPanel());
-		 if (returnVal!=JFileChooser.APPROVE_OPTION) 
-		 {
-			return;
-		 }
-		
-		 File readscore=choose.getSelectedFile();
+		 File readscore=new File(fileaddress);
+
+			if (!readscore.exists()) 
+			{
+				JOptionPane.showMessageDialog(null,readscore.getAbsolutePath()+" is not existed. Please Check the address");
+				
+				try {
+					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new residual file "+readscore.getAbsolutePath()+" Failed\n", GUIMDR.myUI.keyWordfailed);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return;
+			}
+			if (!readscore.isFile()) 
+			{
+				JOptionPane.showMessageDialog(null,readscore.getAbsolutePath()+" is not a file. Please Check the address");
+				
+				try {
+					GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading new residual file "+readscore.getAbsolutePath()+" Failed\n", GUIMDR.myUI.keyWordfailed);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return;
+			}
 		 FileReader fileReader=null;
 		 BufferedReader bufferedReader=null;
 		 Vector<Double> residuals=new Vector<>();
@@ -1513,9 +1525,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		pnlselectedresidual.removeAll();
 		pnlselectedresidual.add(scrollpane_temp_table);
 		pnlselectedresidual.updateUI();
-		txascorefile.setText(readscore.getAbsolutePath());
-		txascorefile.enable(false);
-		txascorefile.updateUI();
+		txtscorefile.setText(readscore.getAbsolutePath());
+		txtscorefile.updateUI();
 		if (GUIMDR.gmdrini.containsKey("residual")) {
 			try {
 				GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemove old residual file "+GUIMDR.gmdrini.get("residual")+"  successed\n", GUIMDR.myUI.keyWordsuccessed);
@@ -1633,7 +1644,8 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	{
 		 JFileChooser choose=new JFileChooser();
 		 choose.setCurrentDirectory(new File(GUIMDR.project_path));
-		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Save best model result", "result");
+		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Result", "result");
+		 choose.setAcceptAllFileFilterUsed(true);
 		 choose.addChoosableFileFilter(filter);
 		 int resultval=choose.showSaveDialog(new Panel());
 		 if (resultval!=JFileChooser.APPROVE_OPTION) 
@@ -1677,8 +1689,9 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	{
 		 JFileChooser choose=new JFileChooser();
 		 choose.setCurrentDirectory(new File(GUIMDR.project_path));
-		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Save cross validation result", "result");
+		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Result", "result");
 		 choose.addChoosableFileFilter(filter);
+		 choose.setAcceptAllFileFilterUsed(true);
 		 int resultval=choose.showSaveDialog(new Panel());
 		 if (resultval!=JFileChooser.APPROVE_OPTION) 
 		 {
@@ -1719,8 +1732,9 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	{
 		 JFileChooser choose=new JFileChooser();
 		 choose.setCurrentDirectory(new File(GUIMDR.project_path));
-		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Save If-Then Rules result", "result");
+		 FileNameExtensionFilter filter=new FileNameExtensionFilter("Result", "result");
 		 choose.addChoosableFileFilter(filter);
+		 choose.setAcceptAllFileFilterUsed(true);
 		 int resultval=choose.showSaveDialog(new Panel());
 		 if (resultval!=JFileChooser.APPROVE_OPTION) 
 		 {
@@ -1838,12 +1852,22 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 	{
 		pnlScorePhenopath.setBorder(BorderFactory.createTitledBorder("File Information"));
 		pnlScorePhenopath.setPreferredSize(new Dimension(785,70));
+		pnlScorePhenopath.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		pnlScorePhenopath.add(labelphenofile);
-		pnlScorePhenopath.add(txtphenopath);
-		txtphenopath.setEnabled(false);
+		
+		pnlScorePhenopath.add(horizontalGlue);
+		
+		pnlScorePhenopath.add(pnlphepath);
+		pnlphepath.setLayout(new GridLayout(0, 1, 0, 0));
+		txtphenopath.setBackground(Color.WHITE);
+		txtphenopath.setColumns(65);
+	//	pnlphepath.setSize(700, 10);
+		pnlphepath.add(txtphenopath);
+		pnlScorePhenopath.add(pnlphepath);
+		
+		pnlScorePhenopath.add(horizontalStrut);
 		pnlScorePhenopath.add(loadphenotype);
 		loadphenotype.addActionListener(new Frame_cmdLoadPhenotype_actionAdapter(this));
-		pnlScorePhenopath.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 		pnlpheofile.setBorder(BorderFactory.createTitledBorder("Phenotype Information"));
 		pnlpheofile.setPreferredSize(new Dimension(785,160));
@@ -1867,14 +1891,32 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		pnlloadvariable.add(pnlloadvar);
 		pnlloadvariable.setPreferredSize(new Dimension(785,40));
 		pnldealresidual.setPreferredSize(new Dimension(785, 50));
+		pnlselectedvar.setLayout(new BoxLayout(pnlselectedvar, BoxLayout.X_AXIS));
 		pnlselectedvar.add(pnlresponse);
 		pnlselectedvar.add(pnlpredictor);
 		pnlselectedvar.add(pnlestimationfunc);
 		pnlresponse.setPreferredSize(new Dimension(266,128));
 		pnlresponse.setBorder(BorderFactory.createTitledBorder("response"));
+		pnlresponse.setLayout(new GridLayout(1, 0, 0, 0));
 		pnlpredictor.setPreferredSize(new Dimension(266,128));
 		pnlpredictor.setBorder(BorderFactory.createTitledBorder("predictor"));
+		pnlpredictor.setLayout(new GridLayout(1, 0, 0, 0));
 		pnlestimationfunc.setPreferredSize(new Dimension(236,158));
+		panel_select.setLayout(new BoxLayout(panel_select,BoxLayout.Y_AXIS));
+		JPanel temp_panel=new JPanel();
+		temp_panel.setPreferredSize(new Dimension(200,40));
+		pnlestimationfunc.setLayout(new BoxLayout(pnlestimationfunc, BoxLayout.Y_AXIS));
+		
+		pnlestimationfunc.add(panel_2);
+		panel_2.setLayout(new GridLayout(0, 1, 0, 0));
+		label.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		panel_2.add(label);
+		
+		pnlestimationfunc.add(panel_3);
+		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
+		panel_3.add(Comblinkfunc);
 		Comblinkfunc.setPreferredSize(new Dimension(200, 25));
 		Comblinkfunc.addItem("Linear Model");
 		Comblinkfunc.addItem("Logistic Model");
@@ -1882,19 +1924,22 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		Comblinkfunc.addItem("Multinomial Logit Model");
 		Comblinkfunc.addItem("Proportional Odds Model");
 		Comblinkfunc.addItem("Proportional Hazards Model");
+		
+		pnlestimationfunc.add(panel_4);
+		panel_4.setLayout(new GridLayout(0, 1, 0, 0));
+		label242.setHorizontalAlignment(SwingConstants.CENTER);
+		panel_4.add(label242);
+		
+		pnlestimationfunc.add(panel_5);
+		panel_5.add(combestimatemethod);
 		combestimatemethod.setMaximumRowCount(8);
 		combestimatemethod.setPreferredSize(new Dimension(200, 25));
 		combestimatemethod.addItem("Maximum likelihood method");
 		combestimatemethod.addItem("Generalized estimating equations");
 		combestimatemethod.addItem("Quasi-maximum likelihood method");
-		panel_select.setLayout(new BoxLayout(panel_select,BoxLayout.Y_AXIS));
-		JPanel temp_panel=new JPanel();
-		temp_panel.setPreferredSize(new Dimension(200,40));
-		pnlestimationfunc.add(label241);
-		pnlestimationfunc.add(Comblinkfunc);
-		pnlestimationfunc.add(label242);
-		pnlestimationfunc.add(combestimatemethod);
-		pnlestimationfunc.add(bntrunscorecalc);
+		
+		pnlestimationfunc.add(panel_6);
+		panel_6.add(bntrunscorecalc);
 		bntrunscorecalc.addActionListener(new Frame_cmdScoreCalculate_actionAdapter(this));
 		pnlselectedvar.setPreferredSize(new Dimension(785,155));
 		
@@ -1903,15 +1948,15 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		cmdloadscore.addActionListener(new Frame_cmdLoadScore_actionAdapter(this));
 		Isusescore.addChangeListener(this);
 		pnldealresidual.setBackground(new Color(240, 240, 240));
-		pnldealresidual.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		pnldealresidual.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		pnldealresidual.add(Isusescore);
 		Isusescore.setEnabled(false);
 		pnldealresidual.add(pnlresidual_path);
 		pnlresidual_path.setPreferredSize(new Dimension(550, 29));
 		pnlresidual_path.setLayout(new GridLayout(0, 1, 0, 0));
-		txascorefile.setBackground(UIManager.getColor("Button.background"));
+		txtscorefile.setBackground(Color.WHITE);
 		
-		pnlresidual_path.add(txascorefile);
+		pnlresidual_path.add(txtscorefile);
 		pnldealresidual.add(cmdloadscore);
 		if (Analysis.phenofile!=null) {
 			txtphenopath.setText(phenofile.getAbsolutePath());
@@ -1929,19 +1974,61 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 			removepredictor.setEnabled(true);
 			addpredictor.setEnabled(true);
 		}
+		score_calculation.setLayout(new BoxLayout(score_calculation, BoxLayout.Y_AXIS));
 	
 		score_calculation.add(pnlScorePhenopath);
 		score_calculation.add(pnlpheofile);
+		pnlpheofile.setLayout(new GridLayout(1, 0, 0, 0));
 		score_calculation.add(pnlloadvariable);
 		score_calculation.add(pnlselectedvar);
 		score_calculation.add(pnlselectedresidual);
+		pnlselectedresidual.setLayout(new GridLayout(1, 0, 0, 0));
 		score_calculation.add(pnldealresidual);
 		pnldealresidual.add(savescore);
 		savescore.setEnabled(false);
 		savescore.addActionListener(new Frame_cmdScoreSave_actionAdapter(this));
-		
+		txtphenopath.addActionListener(new JTextArea_loadpheno_actionAdapter(this));
+		txtscorefile.addActionListener(new JTextArea_loadScore_actionAdapter(this));
+	}
+	
+	class JTextArea_loadpheno_actionAdapter implements ActionListener
+	{
+		Analysis adapter;
+		public JTextArea_loadpheno_actionAdapter(Analysis adapter) 
+		{
+			// TODO Auto-generated constructor stub
+			this.adapter=adapter;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			cmdLoadphenotype_actionPerformed(txtphenopath.getText());
+			adapter.repaint();
+		}
 		
 	}
+	
+	class JTextArea_loadScore_actionAdapter implements ActionListener
+	{
+		Analysis adapter;
+		public JTextArea_loadScore_actionAdapter(Analysis adapter) 
+		{
+			// TODO Auto-generated constructor stub
+			this.adapter=adapter;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			
+			cmdLoadScore_actionPerformed(txtscorefile.getText());
+			adapter.repaint();
+		}
+		
+	}
+	
+	
 	
 	public void initConfiguration()
 	{	
@@ -1967,7 +2054,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		set3010.add(button3010);
 		button3010.setEnabled(false);
 		set3010.setPreferredSize(new Dimension(800,40));
-		set3010.setLayout(new FlowLayout(FlowLayout.CENTER));
+		set3010.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JPanel temp=new JPanel();
 		temp.setPreferredSize(new Dimension(800,40));
 		set31.add(temp);
@@ -1984,12 +2071,13 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 		set31.add(set313);
 		set313.add(radiobutton313);
 		radiobutton313.addItemListener(this);
+		pnlconfiguration.setLayout(new BorderLayout(0, 0));
 		set313.setPreferredSize(new Dimension(800,40));
 		set313.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 		
 		
-		pnlconfiguration.add(set31);
+		pnlconfiguration.add(set31, BorderLayout.NORTH);
 	}
 	
 	public void itemStateChanged(ItemEvent e) 
@@ -2105,7 +2193,7 @@ public class Analysis extends JFrame implements ActionListener, ItemListener,Cha
 
 	private void resetForm() {
 		dtmSummaryTable.setRowCount(0);
-//		prgFilterProgress.setValue(unfiltered == null ? 0 : 1);
+		prgProgress.setValue(unfiltered == null ? 0 : 1);
 //		Isusescore.setSelected(false);
 //		Isusescore.updateUI();
 		clearTabs();

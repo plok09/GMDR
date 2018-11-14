@@ -84,7 +84,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 	private JButton btnphenobrowse=new JButton("Browse");
 	private final JPanel pnlbinfilechoose = new JPanel();
 	private final JPanel pnlstandardfilechoose = new JPanel();
-	private boolean binary=true;
+	private int binary=-1;
 	public static void main(String[] args) {
 		LoadData loadData=new LoadData();
 		loadData.setVisible(true);
@@ -313,6 +313,11 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				return;
 			}
 			txabedfilepath.setText(chooser.getSelectedFile().getAbsolutePath());
+			if (indexofStandard!=0) 
+			{
+				indexofStandard=0;
+				indexofBinary=0;
+			}
 			indexofBinary++;
 		}
 		if (temp_button==btnbimbrowse)
@@ -338,13 +343,18 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				return;
 			}
 			txafamfilepath.setText(chooser.getSelectedFile().getAbsolutePath());
+			if (indexofStandard!=0) 
+			{
+				indexofStandard=0;
+				indexofBinary=0;
+			}
 			indexofBinary++;
 		}
 		if(temp_button==btnpedbrowse)
 		{
 			JFileChooser chooser=new JFileChooser(GUIMDR.project_path);
 			
-			FileNameExtensionFilter filter=new FileNameExtensionFilter("ped","ped");
+			FileNameExtensionFilter filter=new FileNameExtensionFilter("PED","ped");
 			chooser.setFileFilter(filter);
 			chooser.setAcceptAllFileFilterUsed(true);
 			int returnVal =chooser.showOpenDialog(new JPanel());
@@ -359,12 +369,17 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				txamapfilepath.setEnabled(true);
 				btnmapbrowse.setEnabled(true);
 			}
+			if (indexofBinary!=0) 
+			{
+				indexofStandard=0;
+				indexofBinary=0;
+			}
 			indexofStandard++;
 		}
 		if(temp_button==btnmapbrowse)
 		{
 			JFileChooser chooser=new JFileChooser(GUIMDR.project_path);
-			FileNameExtensionFilter filter=new FileNameExtensionFilter("map File","map");
+			FileNameExtensionFilter filter=new FileNameExtensionFilter("MAP","map");
 			chooser.setFileFilter(filter);
 			int returnVal =chooser.showOpenDialog(new JPanel());
 			if (returnVal!=JFileChooser.APPROVE_OPTION) {
@@ -378,7 +393,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
        {
 			
 			JFileChooser pheChooser=new JFileChooser(GUIMDR.project_path);
-			FileNameExtensionFilter filter=new FileNameExtensionFilter("Phenotype File", "phe");
+			FileNameExtensionFilter filter=new FileNameExtensionFilter("PHE", "phe");
 			pheChooser.setFileFilter(filter);
 			int returnVal=pheChooser.showOpenDialog(new JPanel());
 			if (returnVal!=JFileChooser.APPROVE_OPTION) {
@@ -393,397 +408,402 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		{
 			String temp_name;
 			File temp_file;
-			GUIMDR.name_bed=new File("");
-			GUIMDR.name_bim=new File("");	
-			GUIMDR.name_fam=new File("");
+		
 			
-			GUIMDR.name_ped=new File("");
-			GUIMDR.name_map=new File("");
-			GUIMDR.name_phe=new File("");
+			
+			
 			GUIMDR.open=0;
 			if (indexofBinary==2&indexofStandard==0) 
 			{
-				binary=true;
+				binary=0;
+				GUIMDR.name_ped=new File("");
+				GUIMDR.name_map=new File("");
 			}
 			if (indexofBinary==0&indexofStandard==1) 
-			{
-				binary=false;
+			{	
+				GUIMDR.name_bed=new File("");
+				GUIMDR.name_bim=new File("");	
+				GUIMDR.name_fam=new File("");
+				binary=1;
 			}
-			if(binary)
-			{
-				if (GUIMDR.gmdrini.containsKey("ped")||GUIMDR.gmdrini.containsKey("map")) 
+			if (binary!=-1) {
+				if(binary==0)
 				{
-					try
-					{
-					
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old standard data files from project \n", GUIMDR.myUI.keyWordwarning);
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("ped")+".\t",GUIMDR.myUI.keyWordwarning);
-						GUIMDR.gmdrini.remove("ped");
-						txapedfilepath.setText("");
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("map")+".\t",GUIMDR.myUI.keyWordwarning);
-						GUIMDR.gmdrini.remove("map");
-						txamapfilepath.setText("");
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);						
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-				if(is_fast_selected)
-				{
-					temp_name=new String(cobbinfilelist.getSelectedItem().toString());
-					temp_name=temp_name.substring(0,temp_name.lastIndexOf("."));
-					
-					temp_file=new File(GUIMDR.project_path+"//"+temp_name+".bed");
-					
-					
-					if(!temp_file.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a BED file");
-						return;
-					}
-					GUIMDR.name_bed=new File(temp_file.getAbsolutePath());
-					if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(temp_file.getAbsolutePath())) 
+					if (GUIMDR.gmdrini.containsKey("ped")||GUIMDR.gmdrini.containsKey("map")) 
 					{
 						try
 						{
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bed file "+GUIMDR.gmdrini.get("bed")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+						
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old standard data files from project \n", GUIMDR.myUI.keyWordwarning);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("ped")+".\t",GUIMDR.myUI.keyWordwarning);
+							GUIMDR.gmdrini.remove("ped");
+							txapedfilepath.setText("");
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("map")+".\t",GUIMDR.myUI.keyWordwarning);
+							GUIMDR.gmdrini.remove("map");
+							txamapfilepath.setText("");
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);						
 						} catch (BadLocationException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
-					GUIMDR.gmdrini.put("bed", temp_file.getAbsolutePath());
-					try 
+					if(is_fast_selected)
 					{
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.gmdrini.get("bed")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) 
-					{
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+						temp_name=new String(cobbinfilelist.getSelectedItem().toString());
+						temp_name=temp_name.substring(0,temp_name.lastIndexOf("."));
 						
-					//Loading Fam File, it must be existed. 
-					temp_file=new File(GUIMDR.project_path+"//"+temp_name+".fam");
-					if(!temp_file.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a fam file");
-						return;
-					}
-					GUIMDR.name_fam=new File(temp_file.getAbsolutePath());
-					if (GUIMDR.gmdrini.containsKey("fam")&&!GUIMDR.gmdrini.get("fam").equals(temp_file.getAbsolutePath())) {
-							try {
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old fam file "+GUIMDR.gmdrini.get("fam")+" from project successed\n", GUIMDR.myUI.keyWordfailed);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-						}
-					GUIMDR.gmdrini.put("fam", temp_file.getAbsolutePath());
-					try {
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.gmdrini.get("fam")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-					
-					temp_file=new File(GUIMDR.project_path+"//"+temp_name+".bim");
-					if(!temp_file.exists())
-					{
+						temp_file=new File(GUIMDR.project_path+"//"+temp_name+".bed");
 						
-						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a BIM file at"+GUIMDR.gmdrini.get("bim")+"\n", GUIMDR.myUI.keyWordwarning);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						GUIMDR.gmdrini.put("bim", "NULL");
-					}
-					else {
-						GUIMDR.name_bim=new File(temp_file.getAbsolutePath());
-						if (GUIMDR.gmdrini.containsKey("bim")&&!GUIMDR.gmdrini.get("bim").equals(temp_file.getAbsolutePath())) 
+						
+						if(!temp_file.exists())
 						{
-							try {
-								
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bim file "+GUIMDR.gmdrini.get("bim")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+							JOptionPane.showMessageDialog(null,"Can't find a BED file");
+							return;
+						}
+						GUIMDR.name_bed=new File(temp_file.getAbsolutePath());
+						if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(temp_file.getAbsolutePath())) 
+						{
+							try
+							{
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bed file "+GUIMDR.gmdrini.get("bed")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
 							} catch (BadLocationException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
-						GUIMDR.gmdrini.put("bim", temp_file.getAbsolutePath());
+						GUIMDR.gmdrini.put("bed", temp_file.getAbsolutePath());
 						try 
 						{
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.gmdrini.get("bim")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-						} catch (BadLocationException e1) {
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.gmdrini.get("bed")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+						} catch (BadLocationException e1) 
+						{
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-					}
-				}
-				else
-				{
-					GUIMDR.name_bed=new File(txabedfilepath.getText());
-					if(!GUIMDR.name_bed.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a BED file");
-						return;
-					}						
-					if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(GUIMDR.name_bed.getAbsolutePath())) {
+							
+						//Loading Fam File, it must be existed. 
+						temp_file=new File(GUIMDR.project_path+"//"+temp_name+".fam");
+						if(!temp_file.exists())
+						{
+							JOptionPane.showMessageDialog(null,"Can't find a fam file");
+							return;
+						}
+						GUIMDR.name_fam=new File(temp_file.getAbsolutePath());
+						if (GUIMDR.gmdrini.containsKey("fam")&&!GUIMDR.gmdrini.get("fam").equals(temp_file.getAbsolutePath())) {
+								try {
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old fam file "+GUIMDR.gmdrini.get("fam")+" from project successed\n", GUIMDR.myUI.keyWordfailed);
+								} catch (BadLocationException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						GUIMDR.gmdrini.put("fam", temp_file.getAbsolutePath());
 						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bed file "+GUIMDR.gmdrini.get("bed")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.gmdrini.get("fam")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
 						} catch (BadLocationException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-					}
-					GUIMDR.gmdrini.put("bed", GUIMDR.name_bed.getAbsolutePath());
-					try {
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.gmdrini.get("bed")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-					
-					GUIMDR.name_fam=new File(txafamfilepath.getText());
-					if(!GUIMDR.name_fam.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a FAM file");
-						return;
-					}		
-					GUIMDR.name_fam=new File(txafamfilepath.getText());
-					if (GUIMDR.gmdrini.containsKey("fam")&&!GUIMDR.gmdrini.get("fam").equals(txafamfilepath.getText())) {
+						
+						
+						temp_file=new File(GUIMDR.project_path+"//"+temp_name+".bim");
+						if(!temp_file.exists())
+						{
+							
 							try {
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old fam file "+GUIMDR.gmdrini.get("fam")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a BIM file at"+GUIMDR.gmdrini.get("bim")+"\n", GUIMDR.myUI.keyWordwarning);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							GUIMDR.gmdrini.put("bim", "NULL");
+						}
+						else {
+							GUIMDR.name_bim=new File(temp_file.getAbsolutePath());
+							if (GUIMDR.gmdrini.containsKey("bim")&&!GUIMDR.gmdrini.get("bim").equals(temp_file.getAbsolutePath())) 
+							{
+								try {
+									
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bim file "+GUIMDR.gmdrini.get("bim")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								} catch (BadLocationException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+							GUIMDR.gmdrini.put("bim", temp_file.getAbsolutePath());
+							try 
+							{
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.gmdrini.get("bim")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
 							} catch (BadLocationException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
-					GUIMDR.gmdrini.put("fam", txafamfilepath.getText());
-					try {
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.gmdrini.get("fam")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
 					}
-		
-					
-					GUIMDR.name_bim=new File(txabimfilepath.getText());
-					if(!GUIMDR.name_bim.exists())
+					else
 					{
-						
+						GUIMDR.name_bed=new File(txabedfilepath.getText());
+						if(!GUIMDR.name_bed.exists())
+						{
+							JOptionPane.showMessageDialog(null,"Can't find a BED file");
+							return;
+						}						
+						if (GUIMDR.gmdrini.containsKey("bed")&&!GUIMDR.gmdrini.get("bed").equals(GUIMDR.name_bed.getAbsolutePath())) {
+							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bed file "+GUIMDR.gmdrini.get("bed")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+						GUIMDR.gmdrini.put("bed", GUIMDR.name_bed.getAbsolutePath());
 						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a BIM file "+"\n", GUIMDR.myUI.keyWordwarning);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bed file "+GUIMDR.gmdrini.get("bed")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
 						} catch (BadLocationException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-						GUIMDR.gmdrini.put("bim", "NULL");
-						GUIMDR.name_bim=new File("NULL");
-					}
-					else {
+						
+						
+						GUIMDR.name_fam=new File(txafamfilepath.getText());
+						if(!GUIMDR.name_fam.exists())
+						{
+							JOptionPane.showMessageDialog(null,"Can't find a FAM file");
+							return;
+						}		
+						GUIMDR.name_fam=new File(txafamfilepath.getText());
+						if (GUIMDR.gmdrini.containsKey("fam")&&!GUIMDR.gmdrini.get("fam").equals(txafamfilepath.getText())) {
+								try {
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old fam file "+GUIMDR.gmdrini.get("fam")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								} catch (BadLocationException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						GUIMDR.gmdrini.put("fam", txafamfilepath.getText());
+						try {
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading fam file "+GUIMDR.gmdrini.get("fam")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+			
+						
 						GUIMDR.name_bim=new File(txabimfilepath.getText());
-						if (GUIMDR.gmdrini.containsKey("bim")&&!GUIMDR.gmdrini.get("bim").equals(txabimfilepath.getText())) 
+						if(!GUIMDR.name_bim.exists())
 						{
+							
 							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a BIM file "+"\n", GUIMDR.myUI.keyWordwarning);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							GUIMDR.gmdrini.put("bim", "NULL");
+							GUIMDR.name_bim=new File("NULL");
+						}
+						else {
+							GUIMDR.name_bim=new File(txabimfilepath.getText());
+							if (GUIMDR.gmdrini.containsKey("bim")&&!GUIMDR.gmdrini.get("bim").equals(txabimfilepath.getText())) 
+							{
+								try {
+									
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bim file "+GUIMDR.gmdrini.get("bim")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								} catch (BadLocationException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+							GUIMDR.gmdrini.put("bim", txabimfilepath.getText());
+							try 
+							{
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.gmdrini.get("bim")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+
+						
+					}
+					String[] files=new String[3];
+					files[0]=GUIMDR.name_bed.getAbsolutePath();
+					files[1]=GUIMDR.name_bim.getAbsolutePath();
+					files[2]=GUIMDR.name_fam.getAbsolutePath();
+					try {
+						GUIMDR.dataset=new Plink(files);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				else 
+				{
+					if (GUIMDR.gmdrini.containsKey("bed")||GUIMDR.gmdrini.containsKey("bim")||GUIMDR.gmdrini.containsKey("fam")) 
+					{
+						try
+						{
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old binary data files from project \n", GUIMDR.myUI.keyWordwarning);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("bed")+".\t",GUIMDR.myUI.keyWordwarning);
+							GUIMDR.gmdrini.remove("bed");
+							txabedfilepath.setText("");
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("fam")+".\t",GUIMDR.myUI.keyWordwarning);
+							GUIMDR.gmdrini.remove("fam");
+							txafamfilepath.setText("");
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("bim")+".\t",GUIMDR.myUI.keyWordwarning);
+							GUIMDR.gmdrini.remove("bim");
+							txabimfilepath.setText("");
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
+							
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					if(is_fast_selected)
+					{
+						temp_name=new String(cbostandardfilelist.getSelectedItem().toString());
+						temp_name=temp_name.substring(0,temp_name.lastIndexOf("."));
+					
+						temp_file=new File(GUIMDR.project_path+"//"+temp_name+".ped");
+					//	System.out.print(temp_file);
+						if(!temp_file.exists())
+						{
+							JOptionPane.showMessageDialog(null,"Can't find a PED file");
+							return;
+						}
+						GUIMDR.name_ped=new File(temp_file.getAbsolutePath());
+						if (GUIMDR.gmdrini.containsKey("ped")&&!GUIMDR.gmdrini.get("ped").equals(GUIMDR.name_ped.getAbsolutePath())) 
+						{	
+							
+							try {
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old ped file "+GUIMDR.gmdrini.get("ped")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								} catch (BadLocationException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+						}
+						GUIMDR.gmdrini.put("ped", temp_file.getAbsolutePath());
+						try {
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}		
+						
+					
+						temp_file=new File(GUIMDR.project_path+"//"+temp_name+".map");
+						
+						if(!temp_file.exists())
+						{
+							
+							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a Map file "+"\n", GUIMDR.myUI.keyWordwarning);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							GUIMDR.gmdrini.put("map", "NULL");
+						}
+						else {
+							GUIMDR.name_map=new File(temp_file.getAbsolutePath());
+							if (GUIMDR.gmdrini.containsKey("map")&&!GUIMDR.gmdrini.get("map").equals(GUIMDR.name_map.getAbsolutePath())) 
+							{	
 								
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old bim file "+GUIMDR.gmdrini.get("bim")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+								try {
+										GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old map file "+GUIMDR.gmdrini.get("map")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+									} catch (BadLocationException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+							}	
+							GUIMDR.gmdrini.put("map", temp_file.getAbsolutePath());
+							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
 							} catch (BadLocationException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
-							}
+							}	
 						}
-						GUIMDR.gmdrini.put("bim", txabimfilepath.getText());
-						try 
+
+					}
+					else
+					{
+						temp_file=new File(txapedfilepath.getText());
+						if(!temp_file.exists())
 						{
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading bim file "+GUIMDR.gmdrini.get("bim")+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+							JOptionPane.showMessageDialog(null,"Can't find a PED file");
+							return;
 						}
-					}
-
-					
-				}
-				String[] files=new String[3];
-				files[0]=GUIMDR.name_bed.getAbsolutePath();
-				files[1]=GUIMDR.name_bim.getAbsolutePath();
-				files[2]=GUIMDR.name_fam.getAbsolutePath();
-				try {
-					GUIMDR.dataset=new Plink(files);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-			else
-			{
-				if (GUIMDR.gmdrini.containsKey("bed")||GUIMDR.gmdrini.containsKey("bim")||GUIMDR.gmdrini.containsKey("fam")) 
-				{
-					try
-					{
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old binary data files from project \n", GUIMDR.myUI.keyWordwarning);
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("bed")+".\t",GUIMDR.myUI.keyWordwarning);
-						GUIMDR.gmdrini.remove("bed");
-						txabedfilepath.setText("");
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("fam")+".\t",GUIMDR.myUI.keyWordwarning);
-						GUIMDR.gmdrini.remove("fam");
-						txafamfilepath.setText("");
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"\t\tRemoving "+GUIMDR.gmdrini.get("bim")+".\t",GUIMDR.myUI.keyWordwarning);
-						GUIMDR.gmdrini.remove("bim");
-						txabimfilepath.setText("");
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(),"Successed\n",GUIMDR.myUI.keyWordsuccessed);
+						GUIMDR.name_ped=temp_file;
 						
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-				if(is_fast_selected)
-				{
-					temp_name=new String(cbostandardfilelist.getSelectedItem().toString());
-					temp_name=temp_name.substring(0,temp_name.lastIndexOf("."));
-				
-					temp_file=new File(GUIMDR.project_path+"//"+temp_name+".ped");
-				//	System.out.print(temp_file);
-					if(!temp_file.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a PED file");
-						return;
-					}
-					GUIMDR.name_ped=new File(temp_file.getAbsolutePath());
-					if (GUIMDR.gmdrini.containsKey("ped")&&!GUIMDR.gmdrini.get("ped").equals(GUIMDR.name_ped.getAbsolutePath())) 
-					{	
-						
-						try {
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old ped file "+GUIMDR.gmdrini.get("ped")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
-							} catch (BadLocationException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-					}
-					GUIMDR.gmdrini.put("ped", temp_file.getAbsolutePath());
-					try {
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}		
-					
-				
-					temp_file=new File(GUIMDR.project_path+"//"+temp_name+".map");
-					
-					if(!temp_file.exists())
-					{
-						
-						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a Map file "+"\n", GUIMDR.myUI.keyWordwarning);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						GUIMDR.gmdrini.put("map", "NULL");
-					}
-					else {
-						GUIMDR.name_map=new File(temp_file.getAbsolutePath());
-						if (GUIMDR.gmdrini.containsKey("map")&&!GUIMDR.gmdrini.get("map").equals(GUIMDR.name_map.getAbsolutePath())) 
+						if (GUIMDR.gmdrini.containsKey("ped")&&!GUIMDR.gmdrini.get("ped").equals(GUIMDR.name_ped.getAbsolutePath())) 
 						{	
 							
 							try {
-									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old map file "+GUIMDR.gmdrini.get("map")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old ped file "+GUIMDR.gmdrini.get("ped")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
 								} catch (BadLocationException e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 						}	
-						GUIMDR.gmdrini.put("map", temp_file.getAbsolutePath());
+						GUIMDR.gmdrini.put("ped", temp_file.getAbsolutePath());
 						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
 						} catch (BadLocationException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
-						}	
-					}
-
-				}
-				else
-				{
-					temp_file=new File(txapedfilepath.getText());
-					if(!temp_file.exists())
-					{
-						JOptionPane.showMessageDialog(null,"Can't find a PED file");
-						return;
-					}
-					GUIMDR.name_ped=temp_file;
-					
-					if (GUIMDR.gmdrini.containsKey("ped")&&!GUIMDR.gmdrini.get("ped").equals(GUIMDR.name_ped.getAbsolutePath())) 
-					{	
-						
-						try {
-								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old ped file "+GUIMDR.gmdrini.get("ped")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+						}		
+						temp_file=new File(txamapfilepath.getText());
+						if(!temp_file.exists())
+						{
+							
+							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a Map file "+"\n", GUIMDR.myUI.keyWordwarning);
 							} catch (BadLocationException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
-					}	
-					GUIMDR.gmdrini.put("ped", temp_file.getAbsolutePath());
+							GUIMDR.gmdrini.put("map", "NULL");
+						}
+						else {
+							GUIMDR.name_map=new File(temp_file.getAbsolutePath());
+							if (GUIMDR.gmdrini.containsKey("map")&&!GUIMDR.gmdrini.get("map").equals(GUIMDR.name_map.getAbsolutePath())) 
+							{	
+								
+								try {
+										GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old map file "+GUIMDR.gmdrini.get("map")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
+									} catch (BadLocationException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+							}	
+							GUIMDR.gmdrini.put("map", temp_file.getAbsolutePath());
+							try {
+								GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
+							} catch (BadLocationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}	
+						}
+						
+						
+					}
+					String[] files=new String[2];
+					files[0]=GUIMDR.name_ped.getAbsolutePath();
+					files[1]=GUIMDR.name_map.getAbsolutePath();
 					try {
-						GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading ped file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-					} catch (BadLocationException e1) {
+						GUIMDR.dataset=new Plink(files);
+					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}		
-					temp_file=new File(txamapfilepath.getText());
-					if(!temp_file.exists())
-					{
-						
-						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tWarning: Can't find a Map file "+"\n", GUIMDR.myUI.keyWordwarning);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						GUIMDR.gmdrini.put("map", "NULL");
 					}
-					else {
-						GUIMDR.name_map=new File(temp_file.getAbsolutePath());
-						if (GUIMDR.gmdrini.containsKey("map")&&!GUIMDR.gmdrini.get("map").equals(GUIMDR.name_map.getAbsolutePath())) 
-						{	
-							
-							try {
-									GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tRemoving old map file "+GUIMDR.gmdrini.get("map")+" from project successed\n", GUIMDR.myUI.keyWordwarning);
-								} catch (BadLocationException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-						}	
-						GUIMDR.gmdrini.put("map", temp_file.getAbsolutePath());
-						try {
-							GUIMDR.myUI.doc.insertString(GUIMDR.myUI.doc.getLength(), Main.dateFormat.format(Main.date.getTime())+"\tLoading map file "+temp_file.getAbsolutePath()+"\tSuccessed\n", GUIMDR.myUI.keyWordsuccessed);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}	
-					}
-					
+					//SimpleTheData thedata=new SimpleTheData(GMDR.name_ped.getAbsolutePath(),GMDR.name_map.getAbsolutePath());
 					
 				}
-				String[] files=new String[2];
-				files[0]=GUIMDR.name_ped.getAbsolutePath();
-				files[1]=GUIMDR.name_map.getAbsolutePath();
-				try {
-					GUIMDR.dataset=new Plink(files);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				//SimpleTheData thedata=new SimpleTheData(GMDR.name_ped.getAbsolutePath(),GMDR.name_map.getAbsolutePath());
 				
 			}
 			
@@ -795,6 +815,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 					JOptionPane.showMessageDialog(null,"Can't find a phenotype file");
 					return;
 				}
+				GUIMDR.name_phe=new File("");
 				if (GUIMDR.gmdrini.containsKey("phe")&&!GUIMDR.gmdrini.get("phe").equals(Analysis.phenofile.getAbsolutePath())) 
 				{	
 					
@@ -852,7 +873,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				btnfambrowse.setEnabled(false);
 				
 				is_fast_selected=true;
-				binary=true;
+				binary=0;
 			}
 			else
 			{
@@ -861,7 +882,7 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				labelbed.setEnabled(true);
 				txabedfilepath.setEnabled(true);
 				btnbedbrowse.setEnabled(true);
-				
+				binary=-1;
 				labelbim.setEnabled(true);
 				txabimfilepath.setEnabled(true);
 				btnbimbrowse.setEnabled(true);
@@ -886,13 +907,14 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 				labelmap.setEnabled(false);
 				txamapfilepath.setEnabled(false);
 				btnmapbrowse.setEnabled(false);
-				binary=false;
+				binary=1;
 				is_fast_selected=true;
 			}
 			else
 			{
 				cbostandardfilelist.setEnabled(false);
-				binary=false;
+				binary=-1;
+		
 				labelped.setEnabled(true);
 				txapedfilepath.setEnabled(true);
 				btnpedbrowse.setEnabled(true);
@@ -906,9 +928,16 @@ public class LoadData extends JFrame implements ItemListener,ActionListener,Chan
 		}
 		if (temp_check==ckusepheno) 
 		{
+			if(ckusepheno.isSelected())
+			{
 			UsePhe=true;
 			btnphenobrowse.setEnabled(true);
 			txaphenofilepath.setEnabled(true);
+			}else {
+				UsePhe=false;
+				btnphenobrowse.setEnabled(false);
+				txaphenofilepath.setEnabled(false);
+			}
 		}
 	}
 

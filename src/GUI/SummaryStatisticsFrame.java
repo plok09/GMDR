@@ -23,7 +23,7 @@ public class SummaryStatisticsFrame extends JFrame
 	private JTextField txtSNPs;
 	private JTextField txtChr;
 	public SummaryStatisticsFrame() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setTitle("Summary");
 		setResizable(false);
 		getContentPane().setLayout(new BorderLayout(0, 0));
