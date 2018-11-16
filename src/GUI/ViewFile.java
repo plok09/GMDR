@@ -24,6 +24,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import javax.swing.text.BadLocationException;
+
+import gmdr.Main;
 
 import java.awt.FlowLayout;
 
@@ -48,10 +51,8 @@ public class ViewFile extends JFrame implements ActionListener {
 	private JTable tab_ped;
 	private JTable tab_map;
 	private JTabbedPane tabbedPane;
-	private JScrollPane scrollPane_1;
-	private JTable table;
 
-	private JButton button = new JButton("Ok");
+	private JButton btnOk = new JButton("OK");
 	/**
 	 * Launch the application.
 
@@ -69,161 +70,165 @@ public class ViewFile extends JFrame implements ActionListener {
 	    tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 		
-		
-		if (!GUIMDR.name_bed.getName().equals("NULL")) 
-		{
-		//	File a=new File("C:\\Users\\Administrator\\Desktop\\example\\example.bed");
-			
-			ReadBed=GUIMDR.name_bed;
-			initBed(ReadBed);
-
-
-			
-		}
-		if (!GUIMDR.name_bim.getName().equals("NULL")) 
+		if (GUIMDR.gmdrini.containsKey("ped")||GUIMDR.gmdrini.containsKey("map")) 
 		{
 			
-			ReadBim=GUIMDR.name_bim;
-			Object[] column={"chromosome", "SNP", "cM", "base-position", "allele 1", "allele 2"};
-			Object[][] Bim=initFile(ReadBim,column.length);
-			JPanel Bim_File = new JPanel();
-			tabbedPane.addTab("Bim File",Bim_File);
-			Bim_File.setLayout(new BorderLayout(0, 0));
+			if (!GUIMDR.name_map.getName().equals("NULL")) 
+			{
+				
 			
-			JPanel panel = new JPanel();
-			Bim_File.add(panel, BorderLayout.SOUTH);
-			
-			tab_bim = new JTable(Bim,column);
-			tab_bim.setFillsViewportHeight(true);
-			tab_bim.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
-			panel.add(tab_bim);
-			//FitTableColumns(tab_bim);
-		    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
-		    tcr.setHorizontalAlignment(JLabel.CENTER);
-		    tab_bim.setDefaultRenderer(Object.class, tcr);
-			JScrollPane scrollPane = new JScrollPane(tab_bim);
-			Bim_File.add(scrollPane, BorderLayout.CENTER);
-			
-		}
-		if (!GUIMDR.name_fam.getName().equals("NULL")) 
-		{
-			
-			ReadFam=GUIMDR.name_fam;
-			Object[] column={"Family ID",
-				             "Individual ID",
-				             "Paternal ID",
-				             "Maternal ID",
-				             "Sex (1=male; 2=female; other=unknown)",
-				             "Phenotype"};
-			Object[][] fam=initFile(ReadFam,column.length);
-			JPanel Fam_File = new JPanel();
-			tabbedPane.addTab("Fam File",Fam_File);
-			Fam_File.setLayout(new BorderLayout(0, 0));
-			
-			JPanel panel = new JPanel();
-			Fam_File.add(panel, BorderLayout.SOUTH);
-			
-			tab_fam = new JTable(fam,column);
-			tab_fam.setFillsViewportHeight(true);
-			tab_fam.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
-			panel.add(tab_fam);
-			DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
-		    tcr.setHorizontalAlignment(JLabel.CENTER);
-		    tab_fam.setDefaultRenderer(Object.class, tcr);
-			//FitTableColumns(tab_fam);
-			JScrollPane scrollPane = new JScrollPane(tab_fam);
-			Fam_File.add(scrollPane, BorderLayout.CENTER);
-			
-		}
-
-		if (!GUIMDR.name_map.getName().equals("NULL")) 
-		{
-			
-		
-			ReadMap=GUIMDR.name_map;
-			Object[] column={"chromosome",
-				             "snp identifier",
-				     "Genetic distance (morgans)",
-				     "Base-pair position (bp units)"};
-			Object[][] map=initFile(ReadMap,column.length);
-			JPanel Map_File = new JPanel();
-			tabbedPane.addTab("Map File",Map_File);
-			Map_File.setLayout(new BorderLayout(0, 0));
-			
-			JPanel panel = new JPanel();
-			Map_File.add(panel, BorderLayout.SOUTH);
-			
-			tab_map = new JTable(map,column);
-			tab_map.setFillsViewportHeight(true);
-			tab_map.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
-			panel.add(tab_map);
-			//FitTableColumns(tab_map);
-			DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
-		    tcr.setHorizontalAlignment(JLabel.CENTER);
-		    tab_map.setDefaultRenderer(Object.class, tcr);
-			JScrollPane scrollPane = new JScrollPane(tab_map);
-			
-			Map_File.add(scrollPane, BorderLayout.CENTER);
-			
-		}
-		if (!GUIMDR.name_ped.getName().equals("NULL")) 
-		{	
-		
-			ReadPed=GUIMDR.name_ped;
-
-			Object[] tmp=getsnp();
-			Object[] column=new Object[6+tmp.length];
-			column[0]="Family ID ";
-		    column[1]="Individual ID ";
-			column[2]="Paternal ID ";
-			column[3]="Maternal ID ";
-			column[4]="Sex ";
-		    column[5]="Phenotype ";
-		    for (int i = 0; i < tmp.length; i++) 
-		    {
-			    column[i+6]=tmp[i];	
+				ReadMap=GUIMDR.name_map;
+				Object[] column={"chromosome",
+					             "snp identifier",
+					     "Genetic distance (morgans)",
+					     "Base-pair position (bp units)"};
+				Object[][] map=initFile(ReadMap,column.length);
+				JPanel Map_File = new JPanel();
+				tabbedPane.addTab("Map File",Map_File);
+				Map_File.setLayout(new BorderLayout(0, 0));
+				
+				JPanel panel = new JPanel();
+				Map_File.add(panel, BorderLayout.SOUTH);
+				
+				tab_map = new JTable(map,column);
+				tab_map.setFillsViewportHeight(true);
+				tab_map.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
+				panel.add(tab_map);
+				//FitTableColumns(tab_map);
+				DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+			    tcr.setHorizontalAlignment(JLabel.CENTER);
+			    tab_map.setDefaultRenderer(Object.class, tcr);
+				JScrollPane scrollPane = new JScrollPane(tab_map);
+				
+				Map_File.add(scrollPane, BorderLayout.CENTER);
+				
 			}
-			Object[][] Ped=initPed(ReadPed,column.length);
-			JPanel Ped_File = new JPanel();
-			tabbedPane.addTab("Ped File",Ped_File);
-			Ped_File.setLayout(new BorderLayout(0, 0));
+			if (!GUIMDR.name_ped.getName().equals("NULL")) 
+			{	
 			
-			JPanel panel = new JPanel();
-			Ped_File.add(panel, BorderLayout.SOUTH);
+				ReadPed=GUIMDR.name_ped;
+
+				Object[] tmp=getsnp();
+				Object[] column=new Object[6+tmp.length];
+				column[0]="Family ID ";
+			    column[1]="Individual ID ";
+				column[2]="Paternal ID ";
+				column[3]="Maternal ID ";
+				column[4]="Sex ";
+			    column[5]="Phenotype ";
+			    for (int i = 0; i < tmp.length; i++) 
+			    {
+				    column[i+6]=tmp[i];	
+				}
+				Object[][] Ped=initPed(ReadPed,column.length);
+				JPanel Ped_File = new JPanel();
+				tabbedPane.addTab("Ped File",Ped_File);
+				Ped_File.setLayout(new BorderLayout(0, 0));
+				
+				JPanel panel = new JPanel();
+				Ped_File.add(panel, BorderLayout.SOUTH);
+				
+				tab_ped = new JTable(Ped,column);
+				tab_ped.setFillsViewportHeight(true);
+				tab_ped.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
+				 tab_ped.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+				panel.add(tab_ped);
+				FitTableColumns(tab_ped);
+				
+				JScrollPane scrollPane = new JScrollPane(tab_ped);
+				scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		       
+			    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+			    tcr.setHorizontalAlignment(JLabel.CENTER);
+			    tab_ped.setDefaultRenderer(Object.class, tcr);
+				Ped_File.add(scrollPane, BorderLayout.CENTER);
 			
-			tab_ped = new JTable(Ped,column);
-			tab_ped.setFillsViewportHeight(true);
-			tab_ped.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
-			 tab_ped.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			panel.add(tab_ped);
-			FitTableColumns(tab_ped);
+				
+			}
+		}
+		if (GUIMDR.gmdrini.containsKey("bed")||GUIMDR.gmdrini.containsKey("bim")||GUIMDR.gmdrini.containsKey("fam")) 
+		{
+			if (!GUIMDR.name_bed.getName().equals("NULL")) 
+			{
+			//	File a=new File("C:\\Users\\Administrator\\Desktop\\example\\example.bed");
+				
+				ReadBed=GUIMDR.name_bed;
+				initBed(ReadBed);
+				
+			}
 			
-			JScrollPane scrollPane = new JScrollPane(tab_ped);
-			scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	       
-		    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
-		    tcr.setHorizontalAlignment(JLabel.CENTER);
-		    tab_ped.setDefaultRenderer(Object.class, tcr);
-			Ped_File.add(scrollPane, BorderLayout.CENTER);
-		
+			if (!GUIMDR.name_bim.getName().equals("NULL")) 
+			{
+				
+				ReadBim=GUIMDR.name_bim;
+				Object[] column={"chromosome", "SNP", "cM", "base-position", "allele 1", "allele 2"};
+				Object[][] Bim=initFile(ReadBim,column.length);
+				JPanel Bim_File = new JPanel();
+				tabbedPane.addTab("Bim File",Bim_File);
+				Bim_File.setLayout(new BorderLayout(0, 0));
+				
+				JPanel panel = new JPanel();
+				Bim_File.add(panel, BorderLayout.SOUTH);
+				
+				tab_bim = new JTable(Bim,column);
+				tab_bim.setFillsViewportHeight(true);
+				tab_bim.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
+				panel.add(tab_bim);
+				//FitTableColumns(tab_bim);
+			    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+			    tcr.setHorizontalAlignment(JLabel.CENTER);
+			    tab_bim.setDefaultRenderer(Object.class, tcr);
+				JScrollPane scrollPane = new JScrollPane(tab_bim);
+				Bim_File.add(scrollPane, BorderLayout.CENTER);
+				
+			}
+			if (!GUIMDR.name_fam.getName().equals("NULL")) 
+			{
+				
+				ReadFam=GUIMDR.name_fam;
+				Object[] column={"Family ID",
+					             "Individual ID",
+					             "Paternal ID",
+					             "Maternal ID",
+					             "Sex (1=male; 2=female; other=unknown)",
+					             "Phenotype"};
+				Object[][] fam=initFile(ReadFam,column.length);
+				JPanel Fam_File = new JPanel();
+				tabbedPane.addTab("Fam File",Fam_File);
+				Fam_File.setLayout(new BorderLayout(0, 0));
+				
+				JPanel panel = new JPanel();
+				Fam_File.add(panel, BorderLayout.SOUTH);
+				
+				tab_fam = new JTable(fam,column);
+				tab_fam.setFillsViewportHeight(true);
+				tab_fam.setFont(new Font("Segoe WP Semibold", Font.PLAIN, 17));
+				panel.add(tab_fam);
+				DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+			    tcr.setHorizontalAlignment(JLabel.CENTER);
+			    tab_fam.setDefaultRenderer(Object.class, tcr);
+				//FitTableColumns(tab_fam);
+				JScrollPane scrollPane = new JScrollPane(tab_fam);
+				Fam_File.add(scrollPane, BorderLayout.CENTER);
+				
+			}
+		}
+	
+		if (!GUIMDR.name_phe.getName().equals("NULL")) 
+		{
+			File PheReader=GUIMDR.name_phe;
 			
 		}
+
+		
 		
 		
 		JPanel panel_2 = new JPanel();
 		contentPane.add(panel_2, BorderLayout.SOUTH);
 		
 		
-		button.addActionListener(this);
-		panel_2.add(button);
-		
-		scrollPane_1 = new JScrollPane();
-		panel_2.add(scrollPane_1);
-		
-		table = new JTable();
-		table.setRowSelectionAllowed(false);
-		table.setFillsViewportHeight(true);
-		panel_2.add(table);
+		btnOk.addActionListener(this);
+		panel_2.add(btnOk);
 		
 		this.setVisible(true);
 	}
@@ -560,7 +565,7 @@ public class ViewFile extends JFrame implements ActionListener {
    
    public void actionPerformed(ActionEvent e) 
 	{
-	   if (e.getSource()==button) 
+	   if (e.getSource()==btnOk) 
 	   {
 		   this.dispose();
 	   }

@@ -549,7 +549,9 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 					e1.printStackTrace();
 				}
 			}
-			SummaryStatisticsFrame statisticsFrame=new SummaryStatisticsFrame();
+			
+			SummaryStatisticsFrame statisticsFrame=new SummaryStatisticsFrame(GUIMDR.dataset);
+			statisticsFrame.setVisible(true);
 			break;
 		case "Save":	
 			Saveingproject(GUIMDR.gmdrini_path);
@@ -1228,7 +1230,7 @@ public class UI extends JFrame implements ItemListener,ActionListener,MenuListen
 		
 			 JFileChooser choose=new JFileChooser();
 			 choose.setCurrentDirectory(new File( GUIMDR.project_path));
-			 FileNameExtensionFilter filter=new FileNameExtensionFilter("GMDR Projest File", "gmdr");
+			 FileNameExtensionFilter filter=new FileNameExtensionFilter("GMDR Projest", "gmdr");
 			 choose.setFileFilter(filter);
 			 resultval =choose.showSaveDialog(new JPanel());
 			

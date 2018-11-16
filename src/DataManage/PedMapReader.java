@@ -39,6 +39,10 @@ public class PedMapReader
 			}
 		}
 	}
+	public ArrayList<String[]> GetMapInfo()
+	{
+		return MapData;
+	}
 	
 	public PedMapReader(String PedFileads, String Mapfileads) throws IOException 
 	{

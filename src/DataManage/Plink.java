@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.function.DoubleBinaryOperator;
 
 import javax.rmi.CORBA.Stub;
 import javax.swing.JFrame;
@@ -38,6 +39,7 @@ public class Plink
 	private int nsnp;
 	private int nind;
 	private int nChr;
+	private String[] SNPPosition;
 	private String[] SNPnames;
 	private double[] phe;
 	private int[] status;
@@ -45,6 +47,7 @@ public class Plink
 	{
 		 int i=files[0].lastIndexOf(".");
 	     String a=files[0].substring(i+1);
+	   
         if("bed".equals(a)|"bim".equals(a)|"fam".equals(a))
         {
         	readbfile(files);
@@ -61,7 +64,10 @@ public class Plink
 			e.printStackTrace();
 		}
         nChr=Chr.length;
+       
 	}
+	
+	
 	
 	public String[] getSNPnames() 
 	{
@@ -78,9 +84,72 @@ public class Plink
 		String SNPnameString=String.join(seq, SNPnames);
 		return SNPnameString;
 	}
+	
+	public double GetmissingRate(int SNPID)
+	{
+		double missing=0;
+		for(int i=0;i<nind;i++)
+		{
+			if (Markers[i][SNPID].equals(". .")) 
+			{
+				missing++;
+			}
+		}
+		return missing/nind;
+	}
+	
+	public String GetSNPPosition(int SNPID)
+	{
+		
+		return SNPPosition[SNPID];
+	}
+	
+	public double GetMAF(int SNPID) 
+	{
+		double F_allele1=0;
+		double F_allele2=0;
+		double count=0;
+		for(int i=0;i<nind;i++)
+		{
+			if (Markers[i][SNPID].equals("1 2")||Markers[i][SNPID].equals("2 1")) 
+			{
+				F_allele1++;
+				F_allele2++;
+				count++;
+			}
+			if (Markers[i][SNPID].equals("1 1")) 
+			{
+				F_allele1++;
+				count++;
+			}
+			if (Markers[i][SNPID].equals("2 2")) 
+			{
+				F_allele2++;
+				count++;
+			}
+			
+		}
+		F_allele1/=count;
+		F_allele2/=count;
+		return Math.min(F_allele1, F_allele2);
+	}
 	public double[] getPhenotype() 
 	{
 		return phe;
+	}
+	
+	public int GetSNPIDbyName(String SNPname) 
+	{
+		int id=-1;
+		for(int i=0;i<nsnp;i++)
+		{
+			if (SNPnames[i].equals(SNPname)) 
+			{
+				id=i;
+				break;
+			}
+		}
+		return id;
 	}
 	public int[] getstatus() 
 	{
@@ -156,9 +225,23 @@ public class Plink
 		SNPnames=genotypeData.GetSNPsName();
 		phe=genotypeData.GetPhes();
 		status=new int[nind];
+		  SNPPosition=new String[nsnp];
 		for(int i=0;i<phe.length;i++)
 		{
 			status[i]=(int)phe[i];
+		}
+		if (genotypeData.GetMapInfo()!=null) 
+		{
+			for(int i = 0; i<nsnp;i++) 
+			{
+				SNPPosition[i]=genotypeData.GetMapInfo().get(i)[0]+":"+genotypeData.GetMapInfo().get(i)[3];
+			}
+		}else 
+		{
+			for(int i = 0; i<nsnp;i++) 
+			{
+				SNPPosition[i]="NA:NA";
+			}
 		}
 		
 	}
@@ -188,7 +271,7 @@ public class Plink
 		}
 		
 		BedBimFamReader genotypeData=new BedBimFamReader(bedfile, bimfile, famfile);
-	
+		
 		nsnp=genotypeData.GetNumSNP();
 		nind=genotypeData.GetNumInds();
 		Markers=genotypeData.GetMarkerbyInd();
@@ -198,6 +281,21 @@ public class Plink
 		for(int i=0;i<phe.length;i++)
 		{
 			status[i]=(int)phe[i];
+		}
+		  SNPPosition=new String[nsnp];
+		if (genotypeData.GetMapInfo()!=null) 
+		{
+			for(int i = 0; i<nsnp;i++) 
+			{
+				String[] info=genotypeData.GetMapInfo().get(i);
+				SNPPosition[i]=""+info[0]+":"+info[3];
+			}
+		}else 
+		{
+			for(int i = 0; i<nsnp;i++) 
+			{
+				SNPPosition[i]="NA:NA";
+			}
 		}
 	}
 	

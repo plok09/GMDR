@@ -58,6 +58,10 @@ public class BedBimFamReader {
 		
 	}
 	
+	public ArrayList<String[]> GetMapInfo()
+	{
+		return BimData;
+	}
 	public BedBimFamReader(String bedFileads, String bimFileads, String famFileads) throws IOException
 	{
 		// TODO Auto-generated constructor stub

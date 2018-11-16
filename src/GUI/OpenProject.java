@@ -21,7 +21,7 @@ public class OpenProject extends JPanel
 	
 		JFileChooser chooser=new JFileChooser();
 		chooser.setCurrentDirectory(new File("."));
-		FileNameExtensionFilter filter=new FileNameExtensionFilter("GMDR Project File", "gmdr");
+		FileNameExtensionFilter filter=new FileNameExtensionFilter("GMDR Project", "gmdr");
 		chooser.setFileFilter(filter);
 		returnVal=chooser.showOpenDialog(new JPanel());
 		if (returnVal==JFileChooser.APPROVE_OPTION) 
