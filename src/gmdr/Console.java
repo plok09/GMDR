@@ -52,7 +52,7 @@ public class Console {
 	static String delim = "\\s+|\\s*,\\s*";
 	public static Set<String> selectedMarker = null;
 	public static Set<Integer> selectedMarkerIdx = null;
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (args.length == 1) {
 			if (args[0].toLowerCase().compareTo("-help") == 0) {
 				Writer w = new OutputStreamWriter(System.out);
@@ -638,7 +638,7 @@ public class Console {
 		}
 	}
 */
-	private static void runAnalysis(OptionSet set, Writer w) {
+	private static void runAnalysis(OptionSet set, Writer w) throws IOException {
 		PrintWriter out = new PrintWriter(w, true);
 		StringBuffer config = new StringBuffer();
 		ColumnFormat columns = new ColumnFormat(Arrays.asList(new Integer[] { new Integer(20), new Integer(59) }));
@@ -947,7 +947,7 @@ public class Console {
 		}
 	}
 
-	private static Dataset openDataSet(String filename[], boolean paired) {
+	private static Dataset openDataSet(String filename[], boolean paired) throws IOException {
 		Dataset data = new Dataset();
 		data.setPaired(paired);
 		data.read(filename);
